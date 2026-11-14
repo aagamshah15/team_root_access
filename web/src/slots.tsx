@@ -47,6 +47,7 @@ interface ChartsModule {
 }
 
 const chartMods = import.meta.glob<ChartsModule>('./charts/index.{ts,tsx}', { eager: true });
+import.meta.glob('./charts/charts.css', { eager: true });   // L08's chart styles (integrator, wave-2 merge)
 const charts: ChartsModule = Object.values(chartMods)[0] ?? {};
 
 function Placeholder({ title, note }: { title: string; note: string }) {
@@ -62,17 +63,27 @@ function Placeholder({ title, note }: { title: string; note: string }) {
 /** `fallback` renders under the placeholder only (finding line, numbers table); a real chart owns its own. */
 type WithFallback<P> = P & { fallback?: ReactNode };
 
+/* Integrator adapter (wave-2 merge): L08's components take `card` (and slightly different names) where this
+ * shell passes `day`. Map the shell's props to L08's here so neither lane's code has to change. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyChart = ComponentType<any>;
+
 export function ProfitChartSlot({ fallback, ...p }: WithFallback<ProfitChartProps>): ReactNode {
-  const C = charts.ProfitChart;
-  return C ? <C {...p} /> : <><Placeholder title="Harvest window: profit by harvest day" note="Drawn by the charts lane (L08)." />{fallback}</>;
+  const C = charts.ProfitChart as AnyChart | undefined;
+  return C ? <C rows={p.rows} card={p.day} shipDay={p.shipDay} shipName={p.shipLabel ?? undefined} onDetails={p.onDetails} />
+    : <><Placeholder title="Harvest window: profit by harvest day" note="Drawn by the charts lane (L08)." />{fallback}</>;
 }
 export function SellableProfitSlot({ fallback, ...p }: WithFallback<SellableProfitStackProps>): ReactNode {
-  const C = charts.SellableProfitStack;
-  return C ? <C {...p} /> : <><Placeholder title="Pots ready to sell and profit, on one date axis" note="Drawn by the charts lane (L08)." />{fallback}</>;
+  const C = charts.SellableProfitStack as AnyChart | undefined;
+  return C ? <C rows={p.rows} card={p.day} sellableTarget={p.sellableTarget ?? 0.95} />
+    : <><Placeholder title="Pots ready to sell and profit, on one date axis" note="Drawn by the charts lane (L08)." />{fallback}</>;
 }
 export function RipenessChartSlot({ fallback, ...p }: WithFallback<RipenessChartProps>): ReactNode {
-  const C = charts.RipenessChart;
-  return C ? <C {...p} /> : <><Placeholder title="Ripeness forecast with its likely range" note="Drawn by the charts lane (L08)." />{fallback}</>;
+  const C = charts.RipenessChart as AnyChart | undefined;
+  return C ? <C rows={p.rows} today={p.today} pctRedNow={p.day.pct_red_now} actualHarvest={p.actualHarvest}
+      past={p.history.filter((h) => h.today < p.today).map((h) => ({ date: h.today, pct_red: h.pct_red_now }))}
+      samples={p.samples.map((s) => ({ date: s.date, pct_red: s.pct_red }))} />
+    : <><Placeholder title="Ripeness forecast with its likely range" note="Drawn by the charts lane (L08)." />{fallback}</>;
 }
 
 /* ---------- Add a room (the contract with L10) ---------- */
