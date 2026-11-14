@@ -115,14 +115,14 @@ function inputsFor(kpi: KpiId, d: DayCard, ship: ShippingRow | undefined, shipLa
 /** The panel content: explain.json when present, else the fallback. */
 export function buildExplainer(
   kpi: KpiId,
-  row: ExplainRow | undefined,
+  row: (ExplainRow & { title?: string }) | undefined,
   d: DayCard,
   assumptions: Assumption[],
   ship?: ShippingRow,
   shipLabel: string | null = null,
 ): Explainer {
   if (row) {
-    return { kpi, title: KPI_TITLE[kpi], meaning: row.meaning, steps: row.steps ?? [], inputs: row.inputs ?? [], caveats: row.caveats ?? [], fallback: false };
+    return { kpi, title: row.title ?? KPI_TITLE[kpi], meaning: row.meaning, steps: row.steps ?? [], inputs: row.inputs ?? [], caveats: row.caveats ?? [], fallback: false };
   }
   const caveats = kpi === 'confidence' ? [...(d.conf_reasons ?? []), ...caveatsFor(kpi, assumptions)] : caveatsFor(kpi, assumptions);
   return { kpi, title: KPI_TITLE[kpi], meaning: MEANING[kpi], steps: STEPS[kpi], inputs: inputsFor(kpi, d, ship, shipLabel), caveats, fallback: true };

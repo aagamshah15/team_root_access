@@ -1,13 +1,17 @@
 /* "When to pluck for shipping" (D14): preset destination plans from shipping.json, all destinations in a table,
  * a plan-your-own-trip form computed in the browser with lib/trip.ts, and the AI assistant behind a flag. */
 import { useState, type FormEvent } from 'react';
-import { useApp } from '../App';
+import { useApp } from '../context';
 import type { DayCard, Destination, ForecastRow, ShippingRow, Truck } from '../data/types';
 import { addDays, day, euro, km, pct, plural, rel, share, short, signedEuro, span } from '../data/format';
 import { PLUCK_WHY } from '../lib/words';
 import { planTrip, type TripPlan } from '../lib/trip';
 import { DestinationPicker, roadWords } from '../components/DestinationPicker';
 import { ShippingAssistant, assistantAvailable } from '../components/ShippingAssistant';
+
+// TODO(wave 2): the AI shipping assistant is switched off for the submission (integrator, 14 Nov). Set to true
+// to show it again; it still only appears inside a Claude artifact (assistantAvailable()).
+const ASSISTANT_ENABLED = false;
 
 interface Props { room: string; d: DayCard; fc: ForecastRow[]; dest: string | null; setDest: (id: string) => void; onExplain: () => void }
 
@@ -69,7 +73,7 @@ export function ShippingSection({ room, d, fc, dest, setDest, onExplain }: Props
       <TripForm truck={truck} onPlan={(label, input) => setTrip({ label, plan: planTrip(fc, d, truck, input) })} />
       <div aria-live="polite">{trip && <TripResult plan={trip.plan} label={trip.label} truck={truck} today={route.t} />}</div>
 
-      {assistantAvailable() && (
+      {ASSISTANT_ENABLED && assistantAvailable() && (
         <>
           <h3>Ask the shipping assistant</h3>
           <ShippingAssistant key={`${room}|${route.t}`} room={room} roomName={store.roomName(room)} today={route.t} d={d} fc={fc}

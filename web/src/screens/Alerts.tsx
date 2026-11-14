@@ -1,5 +1,5 @@
 /* Screen 3: Alerts across the customer's rooms, newest first, each with its reason and the numbers behind it. */
-import { useApp } from '../App';
+import { useApp } from '../context';
 import { addDays, day, humanKey, plural } from '../data/format';
 import { ALERT_DAYS } from '../data/store';
 import type { AlertRow } from '../data/types';

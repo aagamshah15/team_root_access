@@ -1,6 +1,7 @@
 /* App shell: loads app/data once, keeps the screen in the URL hash, and draws the banner, header, tabs,
  * current screen and the credit footer (DESIGN.md: banner and dataset credit on every screen). */
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { AppCtx, useApp, type Ctx } from './context';
 import { loadData, isMock } from './data/load';
 import { Store } from './data/store';
 import { addDays, long, short } from './data/format';
@@ -11,21 +12,6 @@ import { RoomScreen } from './screens/Room';
 import { Alerts } from './screens/Alerts';
 import { How } from './screens/How';
 import { AddRoomScreen } from './slots';
-
-interface Ctx {
-  store: Store;
-  route: Route;
-  href: (over: Partial<Route>) => string;
-  go: (over: Partial<Route>) => void;
-  /** Turn an evidence photo path (relative to the page, e.g. data/photos/x.jpg) into a URL. */
-  photoUrl: (p: string | null) => string | null;
-}
-const AppCtx = createContext<Ctx | null>(null);
-export const useApp = (): Ctx => {
-  const c = useContext(AppCtx);
-  if (!c) throw new Error('useApp outside the app');
-  return c;
-};
 
 export function App() {
   const [store, setStore] = useState<Store | null>(null);

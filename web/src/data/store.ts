@@ -1,6 +1,7 @@
 /* Indexes over the loaded files and the look-ups the screens need. Lookups only: no figure is computed here
  * beyond picking rows, sorting them and counting alerts. */
 import { addDays } from './format';
+import { expandKpi, isCompact, type CompactRow } from '../lib/explainCompact';
 import type {
   AlertRow, AppData, Customer, DayCard, Destination, EvidenceRow, ExplainRow, ForecastRow, ISODate, KpiId, Room,
   ShippingRow, Truck, WhatIfRow,
@@ -44,6 +45,7 @@ export class Store {
   readonly destinations: Destination[];
   readonly truck: Truck | null;
   private explainBy: Map<string, ExplainRow>;
+  private explainCompact: Map<string, CompactRow>;
   readonly minToday: ISODate;
   readonly maxToday: ISODate;
 
@@ -65,7 +67,10 @@ export class Store {
     this.shipBy = new Map(data.shipping.rows.map((r) => [`${r.room}|${r.today}|${r.destination}`, r]));
     this.destinations = data.shipping.meta.destinations ?? [];
     this.truck = data.shipping.meta.truck ?? null;
-    this.explainBy = new Map(data.explain.rows.map((r) => [`${r.room}|${r.today}|${r.kpi}`, r]));
+    // explain.json comes in L09's compact shape (meta.kpis + rows of values) or the contract's row shape.
+    const compact = isCompact(data.explain.meta);
+    this.explainCompact = new Map(compact ? (data.explain.rows as unknown as CompactRow[]).map((r) => [`${r.room}|${r.today}`, r]) : []);
+    this.explainBy = new Map(compact ? [] : data.explain.rows.map((r) => [`${r.room}|${r.today}|${r.kpi}`, r]));
     const todays = data.days.rows.map((r) => r.today).sort();
     this.minToday = todays[0] ?? DEFAULT_TODAY;
     this.maxToday = todays[todays.length - 1] ?? DEFAULT_TODAY;
@@ -114,8 +119,18 @@ export class Store {
   ship(room: string, today: ISODate, dest: string): ShippingRow | undefined {
     return this.shipBy.get(`${room}|${today}|${dest}`);
   }
-  explain(room: string, today: ISODate, kpi: KpiId): ExplainRow | undefined {
+  /** The explainer row for one KPI (expanded from the compact file when needed). */
+  explain(room: string, today: ISODate, kpi: KpiId): (ExplainRow & { title?: string }) | undefined {
+    const row = this.explainCompact.get(`${room}|${today}`);
+    const card = this.day(room, today);
+    if (row && card && isCompact(this.data.explain.meta)) return expandKpi(this.data.explain.meta, row, card, kpi);
     return this.explainBy.get(`${room}|${today}|${kpi}`);
+  }
+  /** Optimal-zone share (e.g. 0.9 = within 10% of the best profit), from explain.json meta.constants when published. */
+  zoneShare(): number | null {
+    const m = this.data.explain.meta as { constants?: { zone_share?: unknown } };
+    const z = Number(m.constants?.zone_share);
+    return Number.isFinite(z) && z > 0 && z < 1 ? z : null;
   }
   defaultDestination(): string | null {
     return this.truck?.default_destination ?? this.destinations[0]?.id ?? null;

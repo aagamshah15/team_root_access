@@ -1,7 +1,7 @@
 /* Screen 2: one room. Hero (best day + harvest day strip + three harvest points) → KPI tiles → charts →
  * shipping → evidence → what-if. Desktop: charts and shipping left, confidence, evidence and what-if right. */
 import { useCallback, useMemo, useState } from 'react';
-import { useApp } from '../App';
+import { useApp } from '../context';
 import type { DayCard, ForecastRow, KpiId, Room } from '../data/types';
 import { day, diffDays, euro, long, pct, plural, rel, share, span, tagDate } from '../data/format';
 import { LEVEL, STATUS, AGREE } from '../lib/words';
@@ -55,8 +55,8 @@ function LiveRoom({ room, d, meta, back }: { room: string; d: DayCard; meta: Roo
   const ev = store.evidence(room, today);
   const closeKpi = useCallback(() => setKpi(null), []);
   const explainer = useMemo(
-    () => (kpi ? buildExplainer(kpi, store.explain(room, today, kpi), d, store.data.assumptions.rows, ship, destination?.name ?? null) : null),
-    [kpi, store, room, today, d, ship, destination],
+    () => (kpi ? buildExplainer(kpi, kpi === 'ship_day' && dest !== store.defaultDestination() ? undefined : store.explain(room, today, kpi), d, store.data.assumptions.rows, ship, destination?.name ?? null) : null),
+    [kpi, store, room, today, d, ship, destination, dest],
   );
   const atEdge = fc.length > 0 && d.best_day === fc[fc.length - 1].date;
   const planted = meta?.planted ?? null;
@@ -85,7 +85,7 @@ function LiveRoom({ room, d, meta, back }: { room: string; d: DayCard; meta: Roo
             <Stamp tone={d.status}>{timingStamp(today, d.best_day)}</Stamp>
           </div>
         </div>
-        <HarvestDayStrip rows={fc} day={d} today={today} shipDay={shipDay} shipLabel={destination?.name ?? null}
+        <HarvestDayStrip rows={fc} day={d} today={today} shipDay={shipDay} shipLabel={destination?.name ?? null} zoneShare={store.zoneShare()}
           onPin={(id) => setKpi(id === 'ship' ? 'ship_day' : id === 'look' ? 'look_day' : 'best_day')} />
       </section>
 

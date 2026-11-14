@@ -1,6 +1,6 @@
 /* Screen 4: How it works & limits. Logic in plain words, the timing test with its baselines (including where a
  * baseline wins), every assumption, limits, data and credits. */
-import { useApp } from '../App';
+import { useApp } from '../context';
 import { plural, short } from '../data/format';
 import type { BacktestRow } from '../data/types';
 

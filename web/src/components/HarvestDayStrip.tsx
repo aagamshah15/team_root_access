@@ -12,11 +12,13 @@ export interface HarvestDayStripProps {
   shipLabel: string | null;
   /** Click a pin label to open its explainer. */
   onPin?: (id: PinId) => void;
+  /** Optimal-zone share from the data (0.9 → "within 10% of the best profit"); null keeps the generic words. */
+  zoneShare?: number | null;
 }
 
 const PIN_WORDS: Record<PinId, string> = { ship: 'pluck day for shipping', profit: 'most profit', look: 'first day at best shelf colour' };
 
-export function HarvestDayStrip({ rows, day: d, today, shipDay, shipLabel, onPin }: HarvestDayStripProps) {
+export function HarvestDayStrip({ rows, day: d, today, shipDay, shipLabel, onPin, zoneShare }: HarvestDayStripProps) {
   const { tiles, pins } = buildStrip(rows, d, today, shipDay);
   if (!tiles.length) return <p className="caption">No forecast days for this date.</p>;
   const cols = { gridTemplateColumns: `repeat(${tiles.length}, var(--tile-w))` };
@@ -58,7 +60,7 @@ export function HarvestDayStrip({ rows, day: d, today, shipDay, shipLabel, onPin
       <div className="strip-key" aria-label="Key">
         <span><i className="k k-plain" />not ready to sell</span>
         <span><i className="k k-gain" />{STATE_WORDS.gain}</span>
-        <span><i className="k k-zone" />{STATE_WORDS.zone}</span>
+        <span><i className="k k-zone" />{zoneShare ? `optimal zone (within ${Math.round((1 - zoneShare) * 100)}% of the best profit)` : STATE_WORDS.zone}</span>
         <span><i className="k k-best" />{STATE_WORDS.best}</span>
         <span><i className="k k-loss" />{STATE_WORDS.loss}</span>
         <span><i className="k k-today" />today</span>

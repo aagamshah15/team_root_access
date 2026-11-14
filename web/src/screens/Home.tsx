@@ -1,5 +1,5 @@
 /* Screen 1: My greenhouses. One crate tag per room for the chosen demo customer, on the replay day. */
-import { useApp } from '../App';
+import { useApp } from '../context';
 import { CrateTag } from '../components/CrateTag';
 import { day, plural } from '../data/format';
 import type { Status } from '../data/types';

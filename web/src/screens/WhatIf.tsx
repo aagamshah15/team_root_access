@@ -1,5 +1,5 @@
 /* Temperature what-if: a slider over the published delta_c values; every number from whatif.json. */
-import { useApp } from '../App';
+import { useApp } from '../context';
 import type { DayCard } from '../data/types';
 import { day, euro, plural, short, signedC, signedEuro } from '../data/format';
 
