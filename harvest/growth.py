@@ -6,8 +6,9 @@ Fruit weight per plant follows an S-curve in warmth since planting (degree-days,
 "weight complete" warmth (the share `growth.complete_share` of W_max, 98% by default) the fruit no
 longer gets heavier: picking from then on costs no weight and the fruit only turns red.
 
-Honest testing (SPEC D6): the curve for a room is fitted on the *other* rooms' weighings dated on or
-before today. With too few weighings the configured starting guess is used instead.
+Honest testing (SPEC D6, D19): the curve for a room, steepness included, is fitted on the *other* rooms'
+weighings dated on or before today. With too few weighings the configured starting guess is used instead
+(before 5 Nov 2024 in the replay); in production that guess would come from the grower's previous crop.
 """
 from __future__ import annotations
 
@@ -34,16 +35,20 @@ def complete_gdd(a: float, g_half: float, share: float) -> float:
 
 
 def fit_growth(samples, settings: dict) -> dict:
-    """Half-weight warmth from crop weighings (room, gdd_cum, fw_total); steepness stays at the setting.
+    """Shared steepness and half-weight warmth from crop weighings (room, gdd_cum, fw_total).
 
-    The steepness is held at `growth.prior_steepness` because three weighings per room cannot show
-    where the curve flattens (freeing it on 6 Nov data gave 778-862 dd, against 737 dd on the full
-    season); with it held, 6 Nov data gives 739-748 dd. Fits only when at least `growth.min_rooms`
-    rooms each have 3+ weighings, the latest past the starting half-weight point. Returns
-    {a, g_half, fitted (bool), rooms (n)}.
+    Each room gets its own final weight; steepness `a` and half-weight warmth are shared. With
+    `growth.fit_steepness` true (D19) the steepness is fitted too, within `growth.steepness_bounds`; if the
+    fit ends on a bound it is not trusted and the setting is used. Otherwise the steepness is held at
+    `growth.prior_steepness` (three weighings per room barely show where the curve flattens, so a free fit
+    is less stable: on 6 Nov data it gives 778-862 dd to finish growing, against 737 dd held).
+    Fits only when at least `growth.min_rooms` rooms each have 3+ weighings, the latest past the starting
+    half-weight point. Returns {a, g_half, fitted (bool), steepness_fitted (bool), rooms (n)}.
+    Hand check: weighings generated with a 0.0148 and g_half 490 are recovered (tests/test_wave2_fields.py).
     """
     gs = settings['growth']
-    prior = dict(a=float(gs['prior_steepness']), g_half=float(gs['prior_half_gdd']), fitted=False, rooms=0)
+    prior = dict(a=float(gs['prior_steepness']), g_half=float(gs['prior_half_gdd']), fitted=False,
+                 steepness_fitted=False, rooms=0)
     s = samples.dropna(subset=['fw_total', 'gdd_cum'])
     s = s[s.groupby('room').gdd_cum.transform('count') >= 3]
     s = s[s.groupby('room').gdd_cum.transform('max') > prior['g_half']]
@@ -52,17 +57,28 @@ def fit_growth(samples, settings: dict) -> dict:
         return prior
     idx = s.room.map({r: i for i, r in enumerate(rooms)}).to_numpy()
     g, w = s.gdd_cum.to_numpy(float), s.fw_total.to_numpy(float)
+    p0 = [prior['g_half']] + [float(s[s.room == r].fw_total.max()) for r in rooms]
+    lo = [200.0] + [10.0] * len(rooms)
+    hi = [1200.0] + [5000.0] * len(rooms)
+
+    if gs.get('fit_steepness'):
+        a_lo, a_hi = (float(x) for x in gs['steepness_bounds'])
+
+        def resid_free(p):
+            return (weight_curve(g, np.asarray(p[2:])[idx], p[0], p[1]) - w) / np.sqrt(np.maximum(w, 30.0))
+
+        p = least_squares(resid_free, [prior['a']] + p0, bounds=([a_lo] + lo, [a_hi] + hi)).x
+        on_bound = min(p[0] - a_lo, a_hi - p[0]) < 1e-3 * (a_hi - a_lo)
+        if not on_bound:
+            return dict(a=float(p[0]), g_half=float(p[1]), fitted=True, steepness_fitted=True, rooms=len(rooms))
 
     a = prior['a']
 
     def resid(p):
         return (weight_curve(g, np.asarray(p[1:])[idx], a, p[0]) - w) / np.sqrt(np.maximum(w, 30.0))
 
-    p0 = [prior['g_half']] + [float(s[s.room == r].fw_total.max()) for r in rooms]
-    lo = [200.0] + [10.0] * len(rooms)
-    hi = [1200.0] + [5000.0] * len(rooms)
     p = least_squares(resid, p0, bounds=(lo, hi)).x
-    return dict(a=a, g_half=float(p[0]), fitted=True, rooms=len(rooms))
+    return dict(a=a, g_half=float(p[0]), fitted=True, steepness_fitted=False, rooms=len(rooms))
 
 
 def weight_complete_day(inputs: Inputs, room: str, today: date, gdd_today: float, gdd_rate: float,
@@ -70,7 +86,8 @@ def weight_complete_day(inputs: Inputs, room: str, today: date, gdd_today: float
     """The first day the room's fruit is at `complete_share` of its final weight, as known by today.
 
     Uses the other rooms' weighings up to today (D6). Past days come from the room's warmth log; future
-    days from today's warmth rate. Returns {day, gdd, fitted}; day is None if warmth has stopped.
+    days from today's warmth rate. Returns {day, gdd, fitted, steepness_fitted, a}; day is None if warmth
+    has stopped.
     Hand check: complete at 737 dd, today 700 dd at 10 dd/day -> ceil(3.7) = 4 days after today.
     """
     rip = known_by(inputs.ripeness, today)
@@ -83,4 +100,4 @@ def weight_complete_day(inputs: Inputs, room: str, today: date, gdd_today: float
         day = today + timedelta(days=math.ceil((target - gdd_today) / gdd_rate))
     else:
         day = None
-    return dict(day=day, gdd=target, fitted=fit['fitted'])
+    return dict(day=day, gdd=target, fitted=fit['fitted'], steepness_fitted=fit['steepness_fitted'], a=fit['a'])

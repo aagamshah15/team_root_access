@@ -17,7 +17,7 @@ import yaml
 
 from harvest.common import REPO, ROOMS, Inputs, planted, actual_harvest, load_inputs, load_settings, today_range
 from harvest.confidence import confidence
-from harvest.economics import harvest_window, look_day, optimal_zone, profit_by_day
+from harvest.economics import harvest_window, look_day, optimal_zone, plant_spread, profit_by_day
 from harvest.evidence import evidence_rows
 from harvest.alerts import alerts
 from harvest.backtest import timing_test
@@ -111,7 +111,8 @@ def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict
              for dest in settings['logistics']['destinations']}
     ships = [compact_ship(room, today, plan) for plan in plans.values()]
     ships = [r for r in ships if r is not None]
-    spread = dict(sd=float(settings['ripeness']['plant_spread_sd']), fitted=False)
+    spread = plant_spread(inputs, room, today, settings)   # D19: the same spread profit_by_day used
+    card['pot_spread_sd'] = spread['sd']   # D19: varies by room-day now; app/trip.js should read it instead of meta.truck
     explain = dict(room=room, today=today, values=room_day_values(
         card, curve, p, plans[settings['logistics']['default_destination']], settings, spread))
     rows = [dict(room=room, today=today, date=r.date, pct_red=r.pct_red, pct_red_low=r.pct_red_low,

@@ -43,9 +43,10 @@ def main():
             g = rate * ((day - START).days + 1)
             p = round(float(pct(g)), 2)
             fw = 300.0
+            # L09: plant-to-plant sd 12.5 points (the setting), so a spread fitted on other rooms matches it
             rip.append(dict(team=room, date=day, sample=sample, plants=6, plants_full=6, fw_total=fw,
                             fw_red=round(fw * p / 100, 2), fw_red_sd=0.0, n_red=0, pct_red_weight=p,
-                            pct_red_weight_sd=0.0, pct_red_count=p, dap=(day - START).days, gdd_cum=g, light_cum=0.0))
+                            pct_red_weight_sd=12.5, pct_red_count=p, dap=(day - START).days, gdd_cum=g, light_cum=0.0))
             for j in range(6):
                 plants.append(dict(team=room, sample=sample, date=day, plant=f'{i}-{j}', fw_total=fw,
                                    fw_red=round(fw * p / 100, 2), pct_red_weight=p))
