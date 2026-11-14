@@ -1,16 +1,15 @@
 /**
  * Dev-only demo route for the charts lane (L08): open /src/charts/demo/ under
- * `npm run dev`. Reads the real app/data files; the D16 fields come from the
- * marked fixture until L09 publishes them. Not part of the app build.
+ * `npm run dev`. Reads the real app/data files (D16 fields from L09). Not part
+ * of the app build.
  */
 import { StrictMode, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './demo-tokens.css';
 import '../charts.css';
-import { ProfitChart, RipenessChart, RipenessScale, SellableProfitStack, withD16 } from '..';
+import { ProfitChart, RipenessChart, RipenessScale, SellableProfitStack } from '..';
 import { cropSamplesFor, forecastFor, pastEstimatesFor, shipDayFor } from '../select';
-import { d16Fixture } from '../__fixtures__/d16.fixture';
-import { realDays, realEvidence, realForecast, realRooms, realShipping, shippingMeta } from '../__fixtures__/realData';
+import { realDays, realEvidence, realForecast, realRooms, realShipping, shippingMeta, zoneShare } from '../__fixtures__/realData';
 
 const params = new URLSearchParams(location.search);
 if (params.get('theme')) document.documentElement.dataset.theme = params.get('theme')!;
@@ -24,7 +23,7 @@ function Demo() {
   const [picked, setPicked] = useState<string | null>(null);
 
   const raw = realDays.find((d) => d.room === room && d.today === t)!;
-  const card = withD16(raw, d16Fixture[`${room}|${t}`]);
+  const card = raw; // days.json now carries optimal_from / optimal_to / look_day (L09)
   const rows = forecastFor(realForecast, room, t);
   const ship = shipDayFor(realShipping, room, t, dest);
   const destName = shippingMeta.destinations.find((d) => d.id === dest)?.name;
@@ -61,8 +60,7 @@ function Demo() {
         <RipenessScale pctRed={raw.pct_red_now} size="small" />
       </div>
       <p className="demo-note">
-        Real app/data. Optimal zone and Look day come from a FIXTURE (src/charts/__fixtures__/d16.fixture.ts) until L09
-        publishes them. {picked ? `Last "details ›": ${picked}` : ''}
+        Real app/data, including L09's optimal zone and Look day. {picked ? `Last "details ›": ${picked}` : ''}
       </p>
       <div className="demo-grid">
         <div className="demo-card">
@@ -72,7 +70,7 @@ function Demo() {
             card={card}
             shipDay={ship}
             shipName={destName}
-            zoneSharePct={90}
+            zoneSharePct={zoneShare !== undefined ? Math.round(zoneShare * 100) : undefined}
             lookPct={shippingMeta.truck.best_band_pct_red[0]}
             onDetails={setPicked}
           />

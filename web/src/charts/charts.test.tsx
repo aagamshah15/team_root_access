@@ -10,13 +10,21 @@ import { d16Fixture } from './__fixtures__/d16.fixture';
 import { realDays, realEvidence, realForecast, realShipping } from './__fixtures__/realData';
 
 // Real data: tomatonuts on 6 Nov 2024 (the mockup's "Room West").
-// From days.json: best 11 Nov, sellable from 10 Nov. Fixture D16: zone 11–12 Nov,
-// look 13 Nov. shipping.json Munich pluck day: read below.
+// From days.json: best 11 Nov, sellable from 10 Nov. D16: zone 11–12 Nov, look 13 Nov
+// (fixture kept for tests; it matches L09's published values, checked below). shipping.json Munich pluck day: read below.
 const ROOM = 'tomatonuts';
 const TODAY = '2024-11-06';
 const card = withD16(realDays.find((d) => d.room === ROOM && d.today === TODAY)!, d16Fixture[`${ROOM}|${TODAY}`]);
 const rows = forecastFor(realForecast, ROOM, TODAY);
 const ship = shipDayFor(realShipping, ROOM, TODAY, 'munich');
+
+describe('D16 fixture vs published data', () => {
+  it('matches L09 on the reference room-day', () => {
+    const real = realDays.find((d) => d.room === ROOM && d.today === TODAY)!;
+    expect([real.optimal_from, real.optimal_to, real.look_day]).toEqual(['2024-11-11', '2024-11-12', '2024-11-13']);
+    expect(d16Fixture[`${ROOM}|${TODAY}`]).toEqual({ optimal_from: '2024-11-11', optimal_to: '2024-11-12', look_day: '2024-11-13' });
+  });
+});
 
 describe('ProfitChart', () => {
   it('puts the three markers on the right dates', () => {

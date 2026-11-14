@@ -5,6 +5,7 @@ import forecast from '../../../../app/data/forecast.json';
 import evidence from '../../../../app/data/evidence.json';
 import shipping from '../../../../app/data/shipping.json';
 import rooms from '../../../../app/data/rooms.json';
+import assumptions from '../../../../app/data/assumptions.json';
 import type { DayCard, ForecastRow } from '../types';
 import type { EvidenceSampleRow, ShippingPluckRow } from '../select';
 
@@ -18,3 +19,8 @@ export const shippingMeta = shipping.meta as unknown as {
 };
 export const realRooms = rooms.rows as unknown as { room: string; display_name: string; actual_harvest: string }[];
 export const dataSource = days.meta.source as string;
+
+/** D16 zone share (0–1) from assumptions.json, e.g. 0.9 → "within 10% of the best profit". */
+export const zoneShare = (assumptions.rows as { name: string; value: unknown }[]).find((r) =>
+  r.name.startsWith('Optimal harvest zone'),
+)?.value as number | undefined;

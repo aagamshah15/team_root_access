@@ -3,9 +3,7 @@ import { render, cleanup } from '@testing-library/react';
 import { ProfitChart } from './ProfitChart';
 import { SellableProfitStack } from './SellableProfitStack';
 import { RipenessChart } from './RipenessChart';
-import { withD16 } from './chartMath';
 import { cropSamplesFor, forecastFor, pastEstimatesFor, shipDayFor } from './select';
-import { d16Fixture } from './__fixtures__/d16.fixture';
 import { realDays, realEvidence, realForecast, realRooms, realShipping, shippingMeta } from './__fixtures__/realData';
 
 // "Done when": the three charts render on real data for every room-day without errors.
@@ -16,7 +14,10 @@ describe('every room-day in app/data', () => {
     console.error = (...a: unknown[]) => errors.push(a.map(String).join(' '));
     try {
       for (const d of realDays) {
-        const card = withD16(d, d16Fixture[`${d.room}|${d.today}`]);
+        // Real D16 fields from L09, no fixture.
+        expect(d.optimal_from).not.toBeUndefined();
+        expect(d.look_day).not.toBeUndefined();
+        const card = d;
         const rows = forecastFor(realForecast, d.room, d.today);
         expect(rows.length).toBeGreaterThan(0);
         const ship = shipDayFor(realShipping, d.room, d.today, shippingMeta.truck.default_destination);
