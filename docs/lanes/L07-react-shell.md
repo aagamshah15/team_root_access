@@ -41,13 +41,14 @@ _Only this lane writes here. Newest first._
 
 | Date | State | Note |
 |---|---|---|
+| 14 Nov 2026 | update | Merged L09 (`dcc5cba`): compact `explain.json` read via `lib/explainCompact.ts` (mirror of `harvest/explain.py`), real zone/look day on the strip, zone share in the key; `trip.ts` uses card `pot_spread_sd`; assistant switched off (TODO flag). 27 Vitest tests, build, `make test` green. Commit `986463c`. |
 | 14 Nov 2026 | done | Shell, design system, all screens on real `app/data/`; typecheck, 23 Vitest tests, build and `make test` green; checked in the browser at 390 and 1280 px, light and dark. Commit `4b97b44` + this hand-off. |
 | 14 Nov 2026 | started | Read SPEC, DESIGN, contract, D14–D18; slot interface note for L08/L10 left in the shared notes folder. |
 
 **Blocked** (outside this lane's files; for the integrator):
 1. `Makefile`: add `web` targets (`npm --prefix web ci`, `npm --prefix web run typecheck`, `npm --prefix web test`, `npm --prefix web run build`) and run the web tests from `make test`. Today `make test` does not run them.
 2. `docs/assumptions.md` (L05/integrator): add the ripeness-stage rule. The ripeness bar maps % red **by weight** to the six USDA colour stages with the USDA *surface* cut points (breakers < 10, turning 10–30, pink 30–60, light red 60–90, red > 90; green < 1). If wrong: the outlined stage on the bar shifts by one step; no forecast number changes. Code: `web/src/lib/ripeness.ts`.
-3. Publish the optimal-zone share (`economics.optimal_zone_share`, 0.90) in `assumptions.json` or `days.json` meta (L09). The strip key now says "close to the best profit" because the "within 10%" figure is not in `app/data/` and may not be hard-coded.
+3. ~~Publish the optimal-zone share~~ resolved: read from `explain.json` `meta.constants.zone_share` (L09). Was: publish the optimal-zone share (`economics.optimal_zone_share`, 0.90) in `assumptions.json` or `days.json` meta (L09). The strip key now says "close to the best profit" because the "within 10%" figure is not in `app/data/` and may not be hard-coded.
 
 **Hand-off**
 - Built:
@@ -65,7 +66,8 @@ _Only this lane writes here. Newest first._
   - Browser (Vite dev server): home, room (several rooms and days incl. 20 Oct `check_crop`, 15 Nov harvested), alerts, how, add, explainer drawer, trip form, at 390 px and 1280 px, light and dark. No console errors; no page-level horizontal scroll at 390 px (fixed one: screen-reader labels in tiles escaped the strip's scroll box).
 - Known limits:
   - Charts are placeholders until L08 merges; profit and ripeness numbers tables stand in.
-  - The current `app/data/` has no `optimal_from/optimal_to/look_day` or `explain.json` yet (L09): the strip shows no light-blue zone, the Look pin shows "—", and the explainer uses the fallback. They appear without code changes once L09's build lands.
+  - L09 merged: zone, Look pin and `explain.json` text now show on real data. The Ship explainer uses `explain.json` only for the default destination (its text names that destination); other destinations use the built-in fallback.
+  - AI shipping assistant is switched off (`ASSISTANT_ENABLED = false` in `ShippingSection.tsx`, TODO) per the integrator's priority call.
   - The assistant could not be exercised here (no artifact runtime); its code is a direct port of the wave-1 one.
   - Not ported: the wave-1 fallback to `app/mock/` when `data/` is missing (the banner still flags `"mock": true`).
   - Fonts load from Google Fonts; offline they fall back to Arial Narrow / system fonts.
