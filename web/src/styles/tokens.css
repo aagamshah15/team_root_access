@@ -1,0 +1,22 @@
+/* Minimal L10 copy of DESIGN.md "Quick start". L07 owns the real tokens.css. */
+:root {
+  --canvas:#f4f4f1; --grid:#dcded9; --paper:#fffdf8; --ink:#15181b; --ink-muted:#5f646b; --hairline:#d6d8d4;
+  --brand:#2a5bd7; --gain:#1f8a3c; --gain-wash:#e3f3e6; --loss:#d23a2a; --loss-wash:#fbe4e1;
+  --zone:#dcebfb; --zone-border:#8db8ea; --best:#ffd166; --watch:#b06a00; --night:#12243f; --log-paper:#e9eae7;
+  --ripe-1:#5f8a3a; --ripe-2:#a7b04a; --ripe-3:#e0a33a; --ripe-4:#e7835e; --ripe-5:#d9573f; --ripe-6:#b3271f;
+  --font-num:'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-sans:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px; --s-8:32px; --s-12:48px;
+  --r-tag:10px 10px 4px 4px; --r-card:14px; --r-tile:6px; --r-pill:999px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --canvas:#121417; --grid:#22262b; --paper:#1a1d21; --ink:#eceae4; --ink-muted:#a5a9b0; --hairline:#2c3036;
+  --brand:#7aa2ff; --gain:#4cc26b; --gain-wash:#173322; --loss:#ff7a6b; --loss-wash:#3a1d1a;
+  --zone:#1b2c44; --zone-border:#3d6aa8; --watch:#f0a540; --night:#0c1a2e; --log-paper:#202327; color-scheme:dark } }
+:root[data-theme="dark"] {
+  --canvas:#121417; --grid:#22262b; --paper:#1a1d21; --ink:#eceae4; --ink-muted:#a5a9b0; --hairline:#2c3036;
+  --brand:#7aa2ff; --gain:#4cc26b; --gain-wash:#173322; --loss:#ff7a6b; --loss-wash:#3a1d1a;
+  --zone:#1b2c44; --zone-border:#3d6aa8; --watch:#f0a540; --night:#0c1a2e; --log-paper:#202327; color-scheme:dark }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font-family: var(--font-sans); }
