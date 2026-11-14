@@ -67,8 +67,8 @@ export default function AddRoom({ today: todayProp }: AddRoomProps = {}) {
   const planted = isoDate(plantingDate) ?? undefined;
 
   // File checks re-run when the planting date or room name changes (they depend on both).
-  const climate = useMemo<FileCheck | undefined>(() => (climateFile ? checkClimateLog(climateFile.text, name) : undefined), [climateFile, name]);
-  const plants = useMemo<FileCheck | undefined>(() => (plantsFile ? checkPlantWeighings(plantsFile.text, planted, name) : undefined), [plantsFile, planted, name]);
+  const climate = useMemo<FileCheck | undefined>(() => (climateFile ? checkClimateLog(climateFile.text, name, today) : undefined), [climateFile, name, today]);
+  const plants = useMemo<FileCheck | undefined>(() => (plantsFile ? checkPlantWeighings(plantsFile.text, planted, name, today) : undefined), [plantsFile, planted, name, today]);
   const photos = useMemo<FileCheck | undefined>(() => (photoNames.length ? checkPhotos(photoNames, planted) : undefined), [photoNames, planted]);
 
   const findings = useMemo(
@@ -104,7 +104,7 @@ export default function AddRoom({ today: todayProp }: AddRoomProps = {}) {
       c && files.push({ kind, label, fileName, ok: c.ok, passed: c.passed, warnings: c.findings.filter((f) => f.level === "warning").length });
     add("climate", "Climate log", climateFile?.name ?? "", climate);
     add("plants", "Plant weighings", plantsFile?.name ?? "", plants);
-    add("photos", "Noon photos", `${photoNames.length} photo${photoNames.length === 1 ? "" : "s"}`, photos);
+    add("photos", "Noon photos", "", photos); // the range line already says how many
     const draft: RoomDraft = {
       draft: true,
       name: name.trim(),
@@ -431,7 +431,8 @@ function Summary({ draft, today, storageOk, onEdit, onRemove }: { draft: RoomDra
           {draft.files.map((f) => (
             <li key={f.kind}>
               <span className="ar-tick" aria-hidden="true">✓</span>
-              <strong>{f.label}</strong>&nbsp;· {f.fileName}
+              <strong>{f.label}</strong>
+              {f.fileName ? ` · ${f.fileName}` : ""}
               {rangeLine(f) ? ` · ${rangeLine(f)}` : ""}
               {f.warnings ? ` · ${f.warnings} note${f.warnings === 1 ? "" : "s"}` : ""}
             </li>

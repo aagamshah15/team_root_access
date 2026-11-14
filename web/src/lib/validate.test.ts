@@ -189,6 +189,13 @@ describe("climate log", () => {
     const c = checkClimateLog("timestamp,air_temp_c\n2027-03-01,20\n2027-03-04,21\n");
     expect(c.findings[0].message).toMatch(/Longest gap in the log is 3 days \(after 1 Mar 2027\)/);
   });
+  it("warns about rows dated after today", () => {
+    // log runs to 3 Mar 2027 but today is 2 Mar 2027
+    const c = checkClimateLog(CLIMATE_GOOD, "north", "2027-03-02");
+    expect(c.ok).toBe(true);
+    expect(c.findings[0].message).toMatch(/dated after today \(latest 3 Mar 2027\)/);
+    expect(checkPlantWeighings(PLANTS_GOOD, "2027-03-01", "", "2027-04-20").findings[0].message).toMatch(/latest 24 Apr 2027/);
+  });
   it("rejects unreadable dates and empty files", () => {
     const c = checkClimateLog("timestamp,air_temp_c\n01/03/2027,20\n");
     expect(c.findings[0].message).toMatch(/Can't read the date in row 2/);

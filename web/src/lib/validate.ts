@@ -197,15 +197,20 @@ export function checkPlantingDate(planted: string, today: string, firstLogDate?:
   return [];
 }
 
+/** Warning for rows dated after today: usually a wrong clock or date format in the export. */
+function futureRows(last: string): Finding {
+  return { level: "warning", message: `Some rows are dated after today (latest ${formatDate(last)}). Check the logger's clock and the date format.` };
+}
+
 // ---------------------------------------------------------------- climate log
 
 /**
  * Check a climate log CSV against the contract: a timestamp and an air temperature (°C) column,
  * dates readable and in time order (per room if the file has a room column), temperatures plausible,
  * no gap longer than RULES.maxGapDays. If the file holds several rooms and one matches `roomName`,
- * only that room's rows are checked.
+ * only that room's rows are checked. With `today`, rows dated after it get a warning.
  */
-export function checkClimateLog(text: string, roomName = ""): FileCheck {
+export function checkClimateLog(text: string, roomName = "", today?: string): FileCheck {
   const csv = parseCsv(text);
   const findings: Finding[] = [];
   const passed: string[] = [];
@@ -295,6 +300,7 @@ export function checkClimateLog(text: string, roomName = ""): FileCheck {
     findings.push({ level: "warning", message: `Longest gap in the log is ${longestGap} days (after ${formatDate(gapAfter)}). Gaps longer than a day make the warmth total less sure.` });
   }
   if (temps.length === 0 && !badDate.length) findings.push({ level: "error", message: "No usable air temperature readings." });
+  if (today && last && daysBetween(today, last) > 0) findings.push(futureRows(last));
 
   if (first && last) passed.push(`${rows.length} rows, ${formatDate(first)} – ${formatDate(last)}`);
   if (temps.length && !outOfRange.length && median <= RULES.tempMaxC) passed.push("Air temperatures in a believable range (°C)");
@@ -312,7 +318,7 @@ export function checkClimateLog(text: string, roomName = ""): FileCheck {
  * record only red fruit weight.
  * Warns when no plant shows red fruit yet (the contract asks for at least one sample from the colour-turning stage).
  */
-export function checkPlantWeighings(text: string, plantingDate?: string, roomName = ""): FileCheck {
+export function checkPlantWeighings(text: string, plantingDate?: string, roomName = "", today?: string): FileCheck {
   const csv = parseCsv(text);
   const findings: Finding[] = [];
   const passed: string[] = [];
@@ -395,6 +401,7 @@ export function checkPlantWeighings(text: string, plantingDate?: string, roomNam
   const maxTotal = totals.length ? Math.max(...totals) : 0;
   if (maxTotal > RULES.maxPlantFruitG) findings.push({ level: "warning", message: `Some plants carry over ${RULES.maxPlantFruitG} g of fruit. Check the weights are per plant and in grams.` });
   else if (totals.length && maxTotal > 0 && maxTotal < 5) findings.push({ level: "warning", message: "All fruit weights are under 5 — they look like kilograms. We need grams per plant." });
+  if (today && last && daysBetween(today, last) > 0) findings.push(futureRows(last));
   if (totals.length && !anyRed) findings.push({ level: "warning", message: "No plant shows red fruit yet. The forecast stays warmth-only until a weighing from the colour-turning stage arrives." });
 
   if (first && last) passed.push(`${rows.length} plants weighed on ${dates.size} day${dates.size === 1 ? "" : "s"} (${formatDate(first)}${first !== last ? ` – ${formatDate(last)}` : ""})`);

@@ -38,6 +38,9 @@
 
 .ar-section { border: 0; margin: 0; padding: 0 0 var(--s-6); min-width: 0; }
 .ar-section + .ar-section { border-top: 1px solid var(--hairline); padding-top: var(--s-5); }
+/* Float the legend so it sits inside the section instead of on its top border. */
+.ar-section > legend { float: left; width: 100%; }
+.ar-section > legend + * { clear: both; }
 
 .ar-field { margin-bottom: var(--s-5); }
 .ar-field:last-child { margin-bottom: 0; }
