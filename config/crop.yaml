@@ -9,7 +9,7 @@
 # D10 (14 Nov 2026): price and re-spacing cost now follow the paper, as approved by the user.
 
 crop: dwarf tomato (potted, sold as whole pots)   # Paper §2.2: 'Pick-&-Joy Red Cherry', 13 cm pots
-planted: 2024-09-03          # Paper §2.1: transplanting on 3 Sep 2024 (all rooms)
+planted: 2024-09-03          # Paper §2.1: transplanting on 3 Sep 2024 (all rooms). D17: the pipeline reads each room's own date from config/customers.yaml; this is the default
 base_temp_c: 10.0            # Convention for tomato degree-days; matches main's gdd_cum (first day 22.7 °C -> 12.7). Not checked in a primary source.
 
 ripeness:
@@ -17,7 +17,11 @@ ripeness:
   onset_red_index: 0.1       # main's forecast.py ONSET_MIN: % of photo that is red fruit, 3 days running = ripening started
   onset_days: 3              # main's photo-onset rule (SPEC §4)
   rate_days: 7               # Team choice (SPEC §4): future warmth per day = mean of the last N days
-  plant_spread_sd: 12.5      # Data: pooled sd of % red across plants in the 5 Nov hand weighings (main, README)
+  plant_spread_sd: 12.5      # Data: pooled sd of % red across plants in the 5 Nov hand weighings, all six rooms (main, README). D19: fallback only, if the fit below fails
+  # D19 (user decision "five rooms, full season"): each room's spread is fitted on the OTHER five rooms' complete-season weighings,
+  # standing in for the grower's previous crop. Caveat: uses weighings dated after "today", as in the timing test.
+  spread_mid_pct: [5, 95]    # D19 team choice: weighings used for the spread must have a room mean in this range of % red (mid-ripening)
+  spread_min_rooms: 3        # D19 team choice: at least this many other rooms with such a weighing, else plant_spread_sd
   horizon_days: 21           # Team choice (SPEC §5): days ahead the harvest window looks
   # D12: starting guess used only before any room has a ripe crop sample (strict "known by today").
   prior_k: 0.03              # main's forecast.py starting value for the curve slope
@@ -46,11 +50,14 @@ economics:
   cost_rate_days: 7          # Team choice (SPEC §5): future daily cost = mean of the last 7 days of the room log
   earliest_sellable_share: 0.95   # PROPOSED (SPEC §5): "earliest sellable day" = this share of pots sellable
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
+  optimal_zone_share: 0.90        # D16 (approved by the user): optimal zone = days with profit per m2 per day within 10 % of the best day
   area_m2: 96.0                   # Paper §2.2: six equal compartments of 96 m2. VERIFIED
 
 growth:                      # Shipping extension: when fruit stops gaining weight (harvest/growth.py)
   complete_share: 0.98       # Team choice: fruit counts as "finished growing" at 98% of its final weight
-  prior_steepness: 0.0148    # Data: fruit-weight S-curve steepness per degree-day, fitted on all six rooms' weighings (full season). In production: the grower's previous crop
+  prior_steepness: 0.0148    # Data: fruit-weight S-curve steepness per degree-day, fitted on all six rooms' weighings (full season). D19: fallback only, if the fit below fails. In production: the grower's previous crop
+  steepness_from: other_rooms_full_season   # D19 (user decision): steepness fitted per room on the OTHER five rooms' complete-season weighings, standing in for the grower's previous crop. Caveat: uses weighings dated after "today", as in the timing test. Any other value: use prior_steepness
+  steepness_bounds: [0.003, 0.1]   # Team choice: plausible range per degree-day; a fit ending on a bound falls back to prior_steepness
   prior_half_gdd: 474.0      # Data: degree-days at half the final fruit weight, same fit; used only before 3 weighings exist
   min_rooms: 3               # Team choice: fit the timing on today's weighings once this many other rooms have 3+
 
@@ -128,10 +135,10 @@ assumptions:
     unit: °C
     source: Common tomato convention; matches the team's derived tables
     if_wrong: Ripening speed per warm day shifts; the what-if slider is most affected.
-  - name: Plant-to-plant spread in ripeness
+  - name: Plant-to-plant spread in ripeness (fallback)
     key: ripeness.plant_spread_sd
     unit: points of % red
-    source: 5 Nov hand weighings, 6 plants per room (dataset)
+    source: 5 Nov hand weighings (dataset). Each room actually uses the spread of the other five rooms' full-season weighings (standing in for the grower's previous crop; includes weighings after "today"); this value only if that fit fails
     if_wrong: Wider spread delays the day 95% of pots are sellable.
   - name: Future warmth and cost per day
     key: ripeness.rate_days
@@ -143,15 +150,20 @@ assumptions:
     unit: share of pots
     source: Team choice (proposed)
     if_wrong: A lower bar shows an earlier date.
+  - name: Optimal harvest zone covers days with profit at least
+    key: economics.optimal_zone_share
+    unit: share of the best day's profit per m2 per day
+    source: Team choice, approved by the user (D16)
+    if_wrong: A lower share widens the zone (more days look fine); a higher share narrows it toward the single best day.
   - name: Fruit counts as finished growing at
     key: growth.complete_share
     unit: share of final fruit weight
     source: Team choice; growth curve fitted on the crop weighings
     if_wrong: A higher share moves the earliest pluck day later.
-  - name: Fruit-weight curve steepness
+  - name: Fruit-weight curve steepness (fallback)
     key: growth.prior_steepness
     unit: per degree-day
-    source: Fitted on all six rooms' weighings (this season); in production, the grower's previous crop
+    source: Fitted on all six rooms' weighings (this season). Each room actually uses a steepness fitted on the other five rooms' full-season weighings (standing in for the grower's previous crop; includes weighings after "today"); this value only if that fit fails
     if_wrong: A flatter curve finishes growing later, so the pluck day moves later.
   - name: Truck temperature
     key: logistics.transit_temp_c

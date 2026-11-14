@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from harvest.common import PLANTED, Inputs, known_by, load_settings
+from harvest.common import Inputs, known_by, load_settings, planted as room_planted
 from harvest.logistics import ripen
 
 # 40 pots placed at evenly spaced normal quantiles: a smooth, repeatable stand-in for "a room of pots".
@@ -79,6 +79,33 @@ def profit_m2_day(revenue_per_pot: float, density: float, running_cost_m2: float
 
 # ---------------------------------------------------------------- inputs a room's curve needs
 
+def plant_spread(inputs: Inputs, room: str, today: date, settings: dict) -> dict:
+    """Plant-to-plant spread in % red (points), standing in for "the grower's previous crop" (D19).
+
+    Fitted on the *other five* rooms' complete-season crop weighings; the held-out room never contributes.
+    Caveat: this uses weighings dated after "today", as in the timing test; in production it would be last
+    season's crop. `today` is kept for the signature but not used.
+    Spread = pooled sd of % red across plants, over the regular crop samples (not the harvest-day count)
+    taken while a room was mid-ripening (mean % red inside `ripeness.spread_mid_pct`), pooled as
+    sqrt(sum((n - 1) sd^2) / sum(n - 1)). With fewer than `ripeness.spread_min_rooms` such rooms the
+    setting `ripeness.plant_spread_sd` is used, and `fitted` says so.
+    Hand check, ideas: the other five rooms' 5 Nov sds 7.80, 11.55, 12.97, 9.34, 10.83 (6 plants each) ->
+    variances 60.84, 133.40, 168.22, 87.24, 117.29 -> mean 113.40 -> sqrt = 10.65 points.
+    Returns {sd, fitted, rooms}.
+    """
+    rs = settings['ripeness']
+    lo, hi = rs.get('spread_mid_pct', [5, 95])
+    r = inputs.ripeness
+    r = r[(r.room != room) & (r['sample'] != 'final') & r.pct_red_weight.between(lo, hi)]
+    r = r.dropna(subset=['pct_red_weight_sd', 'plants'])
+    r = r[r.plants >= 2]
+    rooms = int(r.room.nunique())
+    if rooms < int(rs.get('spread_min_rooms', 3)):
+        return dict(sd=float(rs['plant_spread_sd']), fitted=False, rooms=rooms)
+    dof = r.plants - 1
+    return dict(sd=float(np.sqrt((dof * r.pct_red_weight_sd ** 2).sum() / dof.sum())), fitted=True, rooms=rooms)
+
+
 def fruit_weight(inputs: Inputs, room: str, today: date) -> float:
     """Fruit weight per pot (g): the room's latest crop sample dated on or before today.
 
@@ -124,6 +151,7 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
     `fc` is L01's forecast (date, pct_red, pct_red_low, pct_red_high). `params` is accepted for the
     contract but not needed: the pot spread works from % red alone (see `plant_pct`).
     `extra_cost_m2_day` is added to the cost rate for future days (the temperature what-if).
+    The pot spread comes from the other five rooms' full-season weighings (`plant_spread`, D19).
     `transit_dd` > 0 judges and pays the pots on arrival: each pot ripens by that many degree-days on
     the room's curve (steepness params['k']) before the sale rule and price apply (shipping extension).
 
@@ -132,8 +160,9 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
     The band is the min/max over ripening {early, expected, late} × gains curve {main, high} (D10).
     """
     s = settings or load_settings()
-    econ, spread = s['economics'], s['ripeness']['plant_spread_sd']
-    planted = s.get('planted', PLANTED)
+    econ = s['economics']
+    spread = plant_spread(inputs, room, today, s)['sd']   # D19: other five rooms, full season (previous-crop stand-in)
+    planted = room_planted(room)   # D17: days grown count from the room's own planting date
     fw = fruit_weight(inputs, room, today)
     c = costs_so_far(inputs, room, today, econ)
     plants_m2 = c['density'] * econ['plant_cost_eur']
@@ -206,3 +235,36 @@ def harvest_window(curve: pd.DataFrame, settings: dict) -> dict:
     return dict(earliest_sellable_day=earliest, best_day=best, losses_start_day=losses,
                 best_day_low=min(scen + [best]), best_day_high=max(scen + [best]),
                 profit_best_m2_day=float(c.profit_m2_day[i]))
+
+
+def optimal_zone(curve: pd.DataFrame, best_day: date, share: float) -> dict:
+    """The optimal harvest zone (D16): days around the best day whose profit is within (1 - share) of it.
+
+    Starting at the best day, the zone grows one day at a time in each direction while the profit per m²
+    per day stays at or above the threshold, so it is always one unbroken run of days that contains the
+    best day. Threshold = best - (1 - share) x |best|: with share 0.90 that is 90 % of a positive best
+    profit, and for a loss-making room (negative best) a loss at most 10 % bigger.
+    Hand check, share 0.9, profits [0.02, 0.05, 0.095, 0.10, 0.092, 0.08] with the best on day 3:
+    threshold 0.09 -> days 2..4 (0.095, 0.10, 0.092); day 5 (0.08) and day 1 (0.05) fall outside.
+    Returns {optimal_from, optimal_to}.
+    """
+    c = curve.reset_index(drop=True)
+    i = int(c.index[c.date == best_day][0])
+    best = float(c.profit_m2_day[i])
+    floor = best - (1 - share) * abs(best)
+    lo = hi = i
+    while lo - 1 >= 0 and c.profit_m2_day[lo - 1] >= floor:
+        lo -= 1
+    while hi + 1 < len(c) and c.profit_m2_day[hi + 1] >= floor:
+        hi += 1
+    return dict(optimal_from=c.date[lo], optimal_to=c.date[hi])
+
+
+def look_day(fc: pd.DataFrame, band_low_pct: float) -> date | None:
+    """Best shelf look (D16): the first forecast day the room reaches `band_low_pct` % red (70 % by default).
+
+    Today itself if the room is already there; None if the forecast never gets there within the horizon.
+    Hand check, band 70: % red [55, 63, 69.9, 70.0, 76] for days 0..4 -> day 3.
+    """
+    hit = fc[fc.pct_red >= band_low_pct]
+    return hit.date.iloc[0] if len(hit) else None

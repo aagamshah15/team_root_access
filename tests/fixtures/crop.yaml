@@ -9,6 +9,8 @@ ripeness:
   onset_days: 3
   rate_days: 7               # future warmth per day = mean of the last N days
   plant_spread_sd: 12.5      # plant-to-plant spread in % red mid-ripening (5 Nov weighings)
+  spread_mid_pct: [5, 95]    # D19: weighings used to fit the spread (room mean % red in this range)
+  spread_min_rooms: 3        # D19: fit the spread once this many other rooms have such a weighing (full season)
   horizon_days: 21
 economics:
   sellable_red_share: 0.3333 # a pot sells only if at least this share of fruit weight is red
@@ -26,6 +28,7 @@ economics:
   cost_rate_days: 7
   earliest_sellable_share: 0.95   # PROPOSED: "earliest sellable day" = this share of pots sellable
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
+  optimal_zone_share: 0.90        # D16: optimal zone = profit within 10 % of the best day
   area_m2: 96.0                   # room area for euro totals (paper §2.2: 96 m2 compartments)
 confidence:                  # PROPOSED thresholds; level = worst of the three parts
   day_range_high_max: 4      # best-day range (days) at most this -> high
@@ -42,6 +45,8 @@ alerts:
 growth:                      # Shipping extension: when fruit stops gaining weight (harvest/growth.py)
   complete_share: 0.98       # Team choice: fruit counts as "finished growing" at 98% of its final weight
   prior_steepness: 0.0148    # Data: fruit-weight S-curve steepness per degree-day, fitted on all six rooms' weighings (full season). In production: the grower's previous crop
+  steepness_from: other_rooms_full_season   # D19: previous-crop stand-in (other five rooms, full season)
+  steepness_bounds: [0.003, 0.1]
   prior_half_gdd: 474.0      # Data: degree-days at half the final fruit weight, same fit; used only before 3 weighings exist
   min_rooms: 3               # Team choice: fit the timing on today's weighings once this many other rooms have 3+
 
