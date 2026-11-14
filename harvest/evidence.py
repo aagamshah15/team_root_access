@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .common import PLANTED, REPO, ROOMS, Inputs, actual_harvest
+from .common import REPO, planted, ROOMS, Inputs, actual_harvest
 
 PHOTOS_DIR = REPO / 'app' / 'data' / 'photos'
 PHOTO_URL_PREFIX = 'data/photos/'      # photo paths are relative to app/index.html
@@ -77,9 +77,10 @@ def room_evidence(inputs: Inputs, room: str, photos_dir: Path = PHOTOS_DIR) -> l
     harvest = actual_harvest(inputs, room)
     daily = inputs.daily[inputs.daily.room == room].set_index('date')
     images = inputs.images[inputs.images.room == room].set_index('date')
+    start = planted(room)   # D17: the room's own planting date
     rows = []
-    for i in range((harvest - PLANTED).days):
-        day = PLANTED + timedelta(days=i)
+    for i in range((harvest - start).days):
+        day = start + timedelta(days=i)
         img = images.loc[day] if day in images.index else None
         lamps = _lamps(img['lamps_on_noon']) if img is not None else None
         red = _clean(img['red_index']) if img is not None else None

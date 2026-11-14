@@ -38,9 +38,9 @@
   }
 
   /** Share of pots sellable when the room as a whole is `p` % red (economics.plant_pct + sale rule). */
-  function sellableShare(p, truck) {
+  function sellableShare(p, truck, spreadSd = truck.pot_spread_sd) {
     const base = logit(p);
-    const sd = 4 * truck.pot_spread_sd / 100;
+    const sd = 4 * spreadSd / 100;
     const need = 100 * truck.sellable_red_share;
     let n = 0;
     for (const z of truck.pot_z) if (pct(base + sd * z) >= need) n += 1;
@@ -65,7 +65,7 @@
     const rows = fc.map((r) => {
       const arrive = ripen(r.pct_red, k, transitDD);
       return { date: r.date, pct_at_pluck: r.pct_red, pct_on_arrival: arrive,
-        sellable_on_arrival: sellableShare(arrive, truck), ...shelf(arrive, k, shopDD, truck) };
+        sellable_on_arrival: sellableShare(arrive, truck, card.pot_spread_sd ?? truck.pot_spread_sd), ...shelf(arrive, k, shopDD, truck) };
     });
     const sellable = rows.find((r) => r.sellable_on_arrival >= truck.earliest_sellable_share);
     const shipBy = rows.filter((r) => r.best_days != null && r.best_days >= need && r.best_until >= r.best_from).pop();

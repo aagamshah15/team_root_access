@@ -22,7 +22,7 @@ from datetime import date, timedelta
 import numpy as np
 import pandas as pd
 
-from harvest.common import PLANTED, ROOMS, Inputs, actual_harvest, load_inputs
+from harvest.common import ROOMS, planted, Inputs, actual_harvest, load_inputs
 from harvest.forecast import curve, date_reaching, fit_params
 
 DECISION_DAY = date(2024, 11, 5)
@@ -58,8 +58,8 @@ def per_room_rows(inputs: Inputs, settings: dict | None = None, decision_day: da
             pct = float(curve(g_h, pp['k'], pp['g50']))
             rows.append(dict(room=room, test='pct_red_at_harvest', method=method, predicted=round(pct, 1),
                              actual=target, error=round(pct - target, 1)))
-        mean_days = np.mean([(harvest[r] - PLANTED).days for r in others])
-        d = PLANTED + timedelta(days=int(round(mean_days)))
+        mean_days = np.mean([(harvest[r] - planted(r)).days for r in others])   # D17: each room's own planting date
+        d = planted(room) + timedelta(days=int(round(mean_days)))
         rows.append(dict(room=room, test='harvest_date', method=BASE_DAYS, predicted=d.isoformat(),
                          actual=h.isoformat(), error=(d - h).days))
         base = float(np.mean([finals[r] for r in others]))
