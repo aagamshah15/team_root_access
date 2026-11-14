@@ -221,7 +221,7 @@ describe("plant weighings", () => {
   it("catches red heavier than total, bad % and negative weights", () => {
     const p = checkPlantWeighings("date,fruit_weight_g,red_fruit_weight_g,pct_red\n2027-04-10,100,150,40\n2027-04-10,100,10,140\n2027-04-10,-3,0,0\n");
     const msgs = p.findings.map((f) => f.message).join(" | ");
-    expect(msgs).toMatch(/blank, negative or not a number in row 4/);
+    expect(msgs).toMatch(/negative or not a number in row 4/);
     expect(msgs).toMatch(/Red fruit weighs more than all fruit in row 2/);
     expect(msgs).toMatch(/between 0 and 100 in row 3/);
   });
@@ -229,6 +229,17 @@ describe("plant weighings", () => {
     const p = checkPlantWeighings("date,fruit_weight_g,pct_red\n2027-04-10,0.21,0\n2027-04-10,0.19,0\n");
     expect(p.ok).toBe(true);
     expect(p.findings.map((f) => f.message).join(" ")).toMatch(/kilograms.*No plant shows red/);
+  });
+  it("skips rows with a blank total as a warning, like the demo's final harvest rows", () => {
+    // row 3 has red weight only (total not measured): skipped with a warning, file still OK
+    const p = checkPlantWeighings("date,fw_total,fw_red\n2024-11-21,336.8,299.5\n2024-11-21,,322.7\n");
+    expect(p.ok).toBe(true);
+    expect(p.findings[0]).toMatchObject({ level: "warning" });
+    expect(p.findings[0].message).toMatch(/1 row has no total fruit weight.*row 3/);
+    // junk text is still an error
+    expect(checkPlantWeighings("date,fw_total,fw_red\n2024-11-21,abc,3\n").ok).toBe(false);
+    // nothing usable at all -> error
+    expect(checkPlantWeighings("date,fw_total,fw_red\n2024-11-21,,3\n").ok).toBe(false);
   });
   it("accepts the team's plants table (fw_total / fw_red aliases)", () => {
     const p = checkPlantWeighings(PLANTS_DEMO_SHAPE, "2024-09-03", "tomatonuts");

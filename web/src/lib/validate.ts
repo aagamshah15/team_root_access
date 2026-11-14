@@ -308,6 +308,8 @@ export function checkClimateLog(text: string, roomName = ""): FileCheck {
 /**
  * Check a plant weighings CSV: a date, a total fruit weight (g) and either red fruit weight (g) or % red.
  * Weights must be numbers ≥ 0, red ≤ total, % red within 0–100, and no weighing before planting.
+ * A blank weight is a missing measurement (warning), not an error: the demo's final-harvest rows
+ * record only red fruit weight.
  * Warns when no plant shows red fruit yet (the contract asks for at least one sample from the colour-turning stage).
  */
 export function checkPlantWeighings(text: string, plantingDate?: string, roomName = ""): FileCheck {
@@ -349,6 +351,7 @@ export function checkPlantWeighings(text: string, plantingDate?: string, roomNam
 
   const badDate: number[] = [];
   const badWeight: number[] = [];
+  const incomplete: number[] = [];
   const redOverTotal: number[] = [];
   const badPct: number[] = [];
   const beforePlanting: number[] = [];
@@ -367,19 +370,25 @@ export function checkPlantWeighings(text: string, plantingDate?: string, roomNam
       if (!last || d > last) last = d;
       if (plantingDate && daysBetween(plantingDate, d) < 0) beforePlanting.push(line);
     }
-    const total = toNumber(r[iTotal], csv.delimiter);
-    const red = iRed >= 0 ? toNumber(r[iRed], csv.delimiter) : null;
-    const pct = iPct >= 0 ? toNumber(r[iPct], csv.delimiter) : null;
-    if (total === null || total < 0 || (iRed >= 0 && iPct < 0 && (red === null || red < 0))) { badWeight.push(line); continue; }
+    const cell = (i: number) => (i >= 0 ? (r[i] ?? "").trim() : "");
+    const total = toNumber(cell(iTotal), csv.delimiter);
+    const red = toNumber(cell(iRed), csv.delimiter);
+    const pct = toNumber(cell(iPct), csv.delimiter);
+    // Junk text or a negative number is an error; a blank cell is just a missing measurement.
+    const junk = (i: number, n: number | null) => i >= 0 && cell(i) !== "" && (n === null || n < 0);
+    if (junk(iTotal, total) || junk(iRed, red) || junk(iPct, pct)) { badWeight.push(line); continue; }
+    if ((red ?? 0) > 0 || (pct ?? 0) > 0) anyRed = true;
+    if (total === null || (red === null && pct === null)) { incomplete.push(line); continue; }
     totals.push(total);
     if (red !== null && red > total) redOverTotal.push(line);
-    if (pct !== null && (pct < 0 || pct > 100)) badPct.push(line);
-    if ((red ?? 0) > 0 || (pct ?? 0) > 0) anyRed = true;
+    if (pct !== null && pct > 100) badPct.push(line);
   }
 
   if (badDate.length) findings.push({ level: "error", message: `Can't read the date in ${rowList(badDate)}. Use ISO dates such as 2027-04-15.` });
   if (beforePlanting.length && plantingDate) findings.push({ level: "error", message: `Weighings dated before the planting date (${formatDate(plantingDate)}) in ${rowList(beforePlanting)}. Check the planting date or those rows.` });
-  if (badWeight.length) findings.push({ level: "error", message: `Fruit weight is blank, negative or not a number in ${rowList(badWeight)}.` });
+  if (badWeight.length) findings.push({ level: "error", message: `A weight or % red is negative or not a number in ${rowList(badWeight)}.` });
+  if (incomplete.length) findings.push({ level: "warning", message: `${incomplete.length} row${incomplete.length === 1 ? " has" : "s have"} no total fruit weight or no red fruit figure (first: ${rowList(incomplete)}). They can't give a share of red and will be skipped for that.` });
+  if (totals.length === 0 && !badWeight.length) findings.push({ level: "error", message: "No row has both a total fruit weight and a red fruit figure." });
   if (redOverTotal.length) findings.push({ level: "error", message: `Red fruit weighs more than all fruit in ${rowList(redOverTotal)}. Check the two weight columns aren't swapped.` });
   if (badPct.length) findings.push({ level: "error", message: `% red must be between 0 and 100 in ${rowList(badPct)}.` });
 
