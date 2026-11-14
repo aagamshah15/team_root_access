@@ -17,7 +17,7 @@ import yaml
 
 from harvest.common import REPO, ROOMS, Inputs, planted, actual_harvest, load_inputs, load_settings, today_range
 from harvest.confidence import confidence
-from harvest.economics import harvest_window, profit_by_day
+from harvest.economics import harvest_window, look_day, optimal_zone, profit_by_day
 from harvest.evidence import evidence_rows
 from harvest.alerts import alerts
 from harvest.backtest import timing_test
@@ -100,6 +100,8 @@ def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict
                 conf_freshness_days=int(conf['freshness_days']), conf_reasons=conf['reasons'],
                 conf_day_range_level=levels.get('day_range'), conf_agreement_level=levels.get('agreement'),
                 conf_freshness_level=levels.get('freshness'))
+    card.update(optimal_zone(curve, win['best_day'], float(settings['economics']['optimal_zone_share'])))  # D16
+    card['look_day'] = look_day(fc, float(settings['logistics']['best_band_pct_red'][0]))                 # D16
     weight = weight_complete_day(inputs, room, today, p['gdd_today'], p['gdd_rate'], settings)
     card['weight_complete_day'] = weight['day']   # shipping extension: fruit stops gaining weight
     card['k_x1000'] = p['k'] * 1000               # curve steepness per 1000 dd (keeps precision after 4-dp rounding) for app/trip.js

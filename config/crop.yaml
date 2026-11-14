@@ -46,6 +46,7 @@ economics:
   cost_rate_days: 7          # Team choice (SPEC §5): future daily cost = mean of the last 7 days of the room log
   earliest_sellable_share: 0.95   # PROPOSED (SPEC §5): "earliest sellable day" = this share of pots sellable
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
+  optimal_zone_share: 0.90        # D16 (approved by the user): optimal zone = days with profit per m2 per day within 10 % of the best day
   area_m2: 96.0                   # Paper §2.2: six equal compartments of 96 m2. VERIFIED
 
 growth:                      # Shipping extension: when fruit stops gaining weight (harvest/growth.py)
@@ -143,6 +144,11 @@ assumptions:
     unit: share of pots
     source: Team choice (proposed)
     if_wrong: A lower bar shows an earlier date.
+  - name: Optimal harvest zone covers days with profit at least
+    key: economics.optimal_zone_share
+    unit: share of the best day's profit per m2 per day
+    source: Team choice, approved by the user (D16)
+    if_wrong: A lower share widens the zone (more days look fine); a higher share narrows it toward the single best day.
   - name: Fruit counts as finished growing at
     key: growth.complete_share
     unit: share of final fruit weight

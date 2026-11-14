@@ -206,3 +206,36 @@ def harvest_window(curve: pd.DataFrame, settings: dict) -> dict:
     return dict(earliest_sellable_day=earliest, best_day=best, losses_start_day=losses,
                 best_day_low=min(scen + [best]), best_day_high=max(scen + [best]),
                 profit_best_m2_day=float(c.profit_m2_day[i]))
+
+
+def optimal_zone(curve: pd.DataFrame, best_day: date, share: float) -> dict:
+    """The optimal harvest zone (D16): days around the best day whose profit is within (1 - share) of it.
+
+    Starting at the best day, the zone grows one day at a time in each direction while the profit per m²
+    per day stays at or above the threshold, so it is always one unbroken run of days that contains the
+    best day. Threshold = best - (1 - share) x |best|: with share 0.90 that is 90 % of a positive best
+    profit, and for a loss-making room (negative best) a loss at most 10 % bigger.
+    Hand check, share 0.9, profits [0.02, 0.05, 0.095, 0.10, 0.092, 0.08] with the best on day 3:
+    threshold 0.09 -> days 2..4 (0.095, 0.10, 0.092); day 5 (0.08) and day 1 (0.05) fall outside.
+    Returns {optimal_from, optimal_to}.
+    """
+    c = curve.reset_index(drop=True)
+    i = int(c.index[c.date == best_day][0])
+    best = float(c.profit_m2_day[i])
+    floor = best - (1 - share) * abs(best)
+    lo = hi = i
+    while lo - 1 >= 0 and c.profit_m2_day[lo - 1] >= floor:
+        lo -= 1
+    while hi + 1 < len(c) and c.profit_m2_day[hi + 1] >= floor:
+        hi += 1
+    return dict(optimal_from=c.date[lo], optimal_to=c.date[hi])
+
+
+def look_day(fc: pd.DataFrame, band_low_pct: float) -> date | None:
+    """Best shelf look (D16): the first forecast day the room reaches `band_low_pct` % red (70 % by default).
+
+    Today itself if the room is already there; None if the forecast never gets there within the horizon.
+    Hand check, band 70: % red [55, 63, 69.9, 70.0, 76] for days 0..4 -> day 3.
+    """
+    hit = fc[fc.pct_red >= band_low_pct]
+    return hit.date.iloc[0] if len(hit) else None

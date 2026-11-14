@@ -56,3 +56,55 @@ def test_today_range_starts_no_earlier_than_planting(inputs, monkeypatch):
     days = today_range(inputs, 'tomatonuts')
     assert days[0] == date(2024, 11, 1)
     assert days[-1] == common.actual_harvest(inputs, 'tomatonuts') - timedelta(days=1)
+
+
+# ---------------------------------------------------------------- D16: optimal zone and look day
+
+def _curve(profits, start=TODAY):
+    import pandas as pd
+    return pd.DataFrame(dict(date=[start + timedelta(days=i) for i in range(len(profits))],
+                             profit_m2_day=profits))
+
+
+def test_optimal_zone_hand_worked():
+    from harvest.economics import optimal_zone
+    # best 0.10 on day 3, share 0.9 -> threshold 0.09: days 2 (0.095), 3, 4 (0.092) qualify; 1 (0.05), 5 (0.08) don't
+    c = _curve([0.02, 0.05, 0.095, 0.10, 0.092, 0.08])
+    z = optimal_zone(c, TODAY + timedelta(days=3), 0.9)
+    assert (z['optimal_from'], z['optimal_to']) == (TODAY + timedelta(days=2), TODAY + timedelta(days=4))
+
+
+def test_optimal_zone_is_contiguous_around_best():
+    from harvest.economics import optimal_zone
+    # day 0 (0.099) is within 10 % of the best but day 1 (0.05) breaks the run, so the zone starts on day 2
+    c = _curve([0.099, 0.05, 0.095, 0.10, 0.06])
+    z = optimal_zone(c, TODAY + timedelta(days=3), 0.9)
+    assert (z['optimal_from'], z['optimal_to']) == (TODAY + timedelta(days=2), TODAY + timedelta(days=3))
+
+
+def test_optimal_zone_loss_making_room():
+    from harvest.economics import optimal_zone
+    # best -0.10 -> threshold -0.10 - 0.1 x 0.10 = -0.11: day 1 (-0.105) in, day 0 (-0.12) and day 3 (-0.115) out
+    c = _curve([-0.12, -0.105, -0.10, -0.115])
+    z = optimal_zone(c, TODAY + timedelta(days=2), 0.9)
+    assert (z['optimal_from'], z['optimal_to']) == (TODAY + timedelta(days=1), TODAY + timedelta(days=2))
+
+
+def test_look_day_hand_worked():
+    import pandas as pd
+    from harvest.economics import look_day
+    fc = pd.DataFrame(dict(date=[TODAY + timedelta(days=i) for i in range(5)], pct_red=[55, 63, 69.9, 70.0, 76]))
+    assert look_day(fc, 70) == TODAY + timedelta(days=3)      # first day at or above 70 %
+    assert look_day(fc, 50) == TODAY                           # already past the band edge -> today
+    assert look_day(fc, 80) is None                            # not reached within the forecast
+
+
+def test_published_cards_have_d16_fields():
+    """On the real build every card has the zone around its best day and a look day consistent with its forecast."""
+    import json
+    days = json.loads((common.REPO / 'app' / 'data' / 'days.json').read_text())['rows']
+    if 'optimal_from' not in days[0]:
+        pytest.skip('app/data not rebuilt with D16 fields yet')
+    for r in days:
+        assert r['optimal_from'] <= r['best_day'] <= r['optimal_to']
+        assert r['look_day'] is None or r['look_day'] >= r['today']
