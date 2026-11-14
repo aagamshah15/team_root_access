@@ -48,6 +48,16 @@ describe('planTrip matches shipping.json', () => {
       expect(plan.sell_until, key).toBe(r.sell_until == null ? null : addDays(plan.arrival_day!, r.sell_until));
     }
   });
+  it('uses the card\'s room-specific spread when present, else meta.truck', () => {
+    const r = ship.rows[0];
+    const c = cards.get(`${r.room}|${r.today}`)!, f = fc.get(`${r.room}|${r.today}`)!;
+    const base = planTrip(f, { ...c, pot_spread_sd: undefined }, truck, { distance_km: 850 });
+    const same = planTrip(f, { ...c, pot_spread_sd: truck.pot_spread_sd }, truck, { distance_km: 850 });
+    const wide = planTrip(f, { ...c, pot_spread_sd: truck.pot_spread_sd * 3 }, truck, { distance_km: 850 });
+    expect(same.earliest_sellable_day).toBe(base.earliest_sellable_day);   // same sd -> same plan
+    // a wider spread leaves more pots below the sale line, so the earliest sellable day can only move later
+    expect((wide.earliest_sellable_day ?? '9999') >= (base.earliest_sellable_day ?? '9999')).toBe(true);
+  });
   it('a warmer truck ripens pots on the road; a cold one flags chilling', () => {
     const any = ship.rows.find((r) => r.destination === 'madrid')!;
     const c = cards.get(`${any.room}|${any.today}`)!, f = fc.get(`${any.room}|${any.today}`)!;

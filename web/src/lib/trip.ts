@@ -34,10 +34,11 @@ export function shelf(arrive: number, k: number, shopDD: number, truck: Truck): 
   return { best_from, best_until, sell_until: Math.floor(to(truck.end_of_life_pct_red)), best_days: Math.max(0, best_until - best_from + 1) };
 }
 
-/** Share of pots sellable when the room as a whole is `p` % red (economics.plant_pct + sale rule). */
-export function sellableShare(p: number, truck: Truck): number {
+/** Share of pots sellable when the room as a whole is `p` % red (economics.plant_pct + sale rule).
+ * `spreadSd`: the room's plant-to-plant spread (days.json card), else the shared setting in meta.truck. */
+export function sellableShare(p: number, truck: Truck, spreadSd: number = truck.pot_spread_sd): number {
   const base = logit(p);
-  const sd = (4 * truck.pot_spread_sd) / 100;
+  const sd = (4 * spreadSd) / 100;
   const need = 100 * truck.sellable_red_share;
   let n = 0;
   for (const z of truck.pot_z) if (pctOf(base + sd * z) >= need) n += 1;
@@ -52,7 +53,7 @@ export interface TripInput {
   drivers?: number;
   min_best_shelf_days?: number;
 }
-export interface TripCard { today: ISODate; k_x1000?: number | null; weight_complete_day?: ISODate | null }
+export interface TripCard { today: ISODate; k_x1000?: number | null; weight_complete_day?: ISODate | null; pot_spread_sd?: number | null }
 export interface TripPlan {
   transit_days: number;
   transit_temp_c: number;
@@ -86,10 +87,11 @@ export function planTrip(fc: { date: ISODate; pct_red: number }[], card: TripCar
   const need = trip.min_best_shelf_days != null ? Number(trip.min_best_shelf_days) : truck.min_best_shelf_days;
   const transitDD = days * Math.max(transitTemp - truck.base_temp_c, 0);
   const shopDD = Math.max(shopTemp - truck.base_temp_c, 0);
+  const spread = card.pot_spread_sd ?? truck.pot_spread_sd;   // room-specific spread when published (L09)
 
   const rows = fc.map((r) => {
     const arrive = ripen(r.pct_red, k, transitDD);
-    return { date: r.date, pct_at_pluck: r.pct_red, pct_on_arrival: arrive, sellable_on_arrival: sellableShare(arrive, truck), ...shelf(arrive, k, shopDD, truck) };
+    return { date: r.date, pct_at_pluck: r.pct_red, pct_on_arrival: arrive, sellable_on_arrival: sellableShare(arrive, truck, spread), ...shelf(arrive, k, shopDD, truck) };
   });
   const sellable = rows.find((r) => r.sellable_on_arrival >= truck.earliest_sellable_share);
   const shipBy = rows.filter((r) => r.best_days != null && r.best_days >= need && r.best_until != null && r.best_until >= r.best_from).pop();

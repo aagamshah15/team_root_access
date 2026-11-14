@@ -59,6 +59,8 @@ export interface DayCard {
   /** D14 shipping extension */
   weight_complete_day?: ISODate | null;
   k_x1000?: number | null;
+  /** Room-specific plant-to-plant spread in % red points, fitted on the other rooms (L09); falls back to meta.truck.pot_spread_sd. */
+  pot_spread_sd?: number | null;
 }
 
 /** forecast.json: one row per room × today × day ahead (0–21). */
