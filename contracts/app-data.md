@@ -47,6 +47,7 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 | conf_day_range_level, conf_agreement_level, conf_freshness_level | str | `high` · `medium` · `low` for each part (added at G2) |
 | optimal_from, optimal_to | date\|null | D16: first and last day of the optimal zone (profit within `economics.optimal_zone_share` of the best day) |
 | look_day | date\|null | D16: first day the room's forecast reaches the lower edge of `logistics.best_band_pct_red` (70% red); null if beyond the horizon |
+| pot_spread_sd | number | D19: plant-to-plant spread in % red points used for this room-day (fitted on the other five rooms' full-season weighings; 12.5 fallback). Read by `app/trip.js` and the React trip port |
 | weight_complete_day | date\|null | shipping extension (D14): day the fruit reaches 98% of its final weight |
 | k_x1000 | number | shipping extension: steepness of the room's ripening curve per 1,000 degree-days, so the app can plan any trip |
 
@@ -73,8 +74,8 @@ Rows only where the pluck day is within the 21-day forecast.
 `room, today, destination (id), pluck_day, pluck_reason (weight|sellable|today), ship_by_day (date|null), pct_at_pluck, pct_on_arrival, sellable_on_arrival (0–1), best_from, best_until, sell_until (int: days after arrival), profit_m2_day, best_profit_day, profit_best_m2_day`
 `meta.destinations` = `[{id, name, distance_km, transit_days}]`; `meta.truck` = the logistics settings used (temperatures, hours, speed, band, end of life, minimum best days, default destination) plus what `app/trip.js` needs to plan a trip in the browser: `base_temp_c`, `pot_spread_sd`, `sellable_red_share`, `earliest_sellable_share`, `pot_z` (the 40 pot quantiles).
 
-### `explain.json` — one row per room × today × KPI (wave 2, L09)
-`room, today, kpi (best_day|pots_ready|profit_best|confidence|look_day|ship_day), meaning (str), steps (list[str]), inputs (list of {name, value, unit, source}), caveats (list[str])`. Plain English; every value also appears in another file or is a direct input. Drives the "How is this worked out?" panel (docs/DESIGN.md).
+### `explain.json` — compact, one row per room × today (wave 2, L09)
+To stay inside the 5 MB budget the texts are stored once. `meta.kpis[kpi] = {title, meaning, steps (templates with {key}), inputs [{name, key, unit, kind, source}], caveats}` for kpis best_day, pots_ready, profit_best, confidence, look_day, ship_day; `meta.constants`, `meta.spread_sources`, `meta.how_to_read`. `rows` = `{room, today, values}`. A `{key}` is looked up in `values`, then the same room-day card in `days.json`, then `meta.constants`. `harvest/explain.py` `expand()` turns it into full rows (meaning, steps, inputs with values, caveats) and `display()` is the formatting rule; the React app mirrors both in `web/src/lib/explainCompact.ts`. Drives the "How is this worked out?" panel.
 
 ### `assumptions.json`
 `name, value, unit, source, if_wrong` — built from `config/crop.yaml`.

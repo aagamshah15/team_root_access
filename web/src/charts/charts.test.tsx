@@ -61,7 +61,7 @@ describe('ProfitChart', () => {
     const plot = container.querySelector('.hc-plot') as HTMLElement;
     fireEvent.keyDown(plot, { key: 'ArrowRight' }); // first day = today
     const tip = container.querySelector('.hc-tip')!;
-    expect(tip.textContent).toBe('6 Nov · −€0.178 · details ›');
+    expect(tip.textContent).toBe('6 Nov · −€0.177 · details ›');   // real data after D19 (five-room spread)
     expect(tip.textContent).not.toMatch(/\n/);
     expect(tip.querySelectorAll('button')).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: 'details ›' }));
