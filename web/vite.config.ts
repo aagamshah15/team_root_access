@@ -8,5 +8,5 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 0, strictPort: false },
   build: { outDir: 'dist', emptyOutDir: true, sourcemap: false },
-  test: { environment: 'jsdom', include: ['src/**/*.test.{ts,tsx}'] },
+  test: { environment: 'jsdom', globals: true, include: ['src/**/*.test.{ts,tsx}'], setupFiles: ['./src/charts/test-setup.ts'] },
 });

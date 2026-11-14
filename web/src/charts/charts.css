@@ -1,0 +1,95 @@
+/*
+ * Chart styles (L08). Colours come only from the DESIGN.md Quick start
+ * variables (L07's src/styles/tokens.css); nothing is hard-coded here.
+ * Everything is prefixed hc- so it cannot clash with L07's classes.
+ */
+
+.hc-frame { margin: 0; display: grid; gap: var(--s-2); color: var(--ink); font-family: var(--font-sans); min-width: 0; }
+.hc-title { margin: 0; font: 600 18px/1.35 var(--font-sans); text-wrap: balance; }
+.hc-finding { margin: 0; font: 500 16px/1.5 var(--font-sans); }
+.hc-caption { font: 400 13px/1.5 var(--font-sans); color: var(--ink-muted); }
+
+.hc-plot { position: relative; width: 100%; min-width: 0; touch-action: pan-y; outline: none; border-radius: var(--r-tile); }
+.hc-plot:focus-visible { box-shadow: 0 0 0 2px var(--brand); }
+.hc-plot svg { display: block; overflow: visible; font-variant-numeric: tabular-nums; }
+
+/* Axes */
+.hc-grid { stroke: var(--hairline); stroke-width: 1; }
+.hc-baseline { stroke: var(--ink); stroke-width: 1; }
+.hc-tick { font: 400 11px var(--font-mono); fill: var(--ink-muted); }
+.hc-panel-label { font: 500 11px var(--font-sans); letter-spacing: 0.07em; text-transform: uppercase; fill: var(--ink-muted); }
+
+/* Lines and areas */
+.hc-line { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.hc-line-past { fill: none; stroke: var(--ink-muted); stroke-width: 1.5; stroke-linejoin: round; }
+.hc-band { fill: var(--ink-muted); opacity: 0.18; }
+.hc-area-gain { fill: var(--gain); opacity: 0.18; }
+.hc-area-loss { fill: var(--loss); opacity: 0.15; }
+.hc-zone { fill: var(--zone); stroke: var(--zone-border); stroke-width: 1; }
+.hc-band-word { font: 400 11px var(--font-sans); fill: var(--ink); }
+.hc-zero { stroke: var(--ink-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.hc-target { stroke: var(--ink); stroke-width: 1.25; stroke-dasharray: 5 3; }
+.hc-target-label { font: 500 11px var(--font-sans); fill: var(--ink); }
+
+/* Harvest-point markers (DESIGN.md → Profit chart) */
+.hc-marker { stroke: var(--ink); }
+.hc-marker-ship { stroke-width: 1.5; stroke-dasharray: 4 3; }
+.hc-marker-profit { stroke-width: 2; }
+.hc-marker-look { stroke: var(--ripe-6); stroke-width: 2; stroke-dasharray: 1 3; stroke-linecap: round; }
+.hc-best-dot { fill: var(--best); stroke: var(--ink); stroke-width: 1.5; }
+.hc-pill text { font: 500 11.5px var(--font-sans); }
+.hc-pill-ship rect { fill: var(--ink); }
+.hc-pill-ship text { fill: var(--paper); }
+.hc-pill-profit rect { fill: var(--best); stroke: var(--ink); stroke-width: 1; }
+.hc-pill-profit text { fill: var(--night); }
+.hc-pill-look rect { fill: var(--loss-wash); stroke: var(--ripe-6); stroke-width: 1; }
+.hc-pill-look text { fill: var(--ink); }
+
+.hc-today { stroke: var(--brand); stroke-width: 2; }
+.hc-today-label { fill: var(--brand); }
+.hc-marker-label { font: 500 11px var(--font-sans); fill: var(--ink); }
+.hc-sample { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+
+/* Hover */
+.hc-guide { stroke: var(--ink-muted); stroke-width: 1; }
+.hc-active-dot { fill: var(--ink); stroke: var(--paper); stroke-width: 1.5; }
+.hc-tip {
+  position: absolute; z-index: 2; white-space: nowrap; pointer-events: auto;
+  background: var(--ink); color: var(--paper); border-radius: var(--r-tile);
+  padding: 4px 10px; font: 400 13px/1.5 var(--font-sans); font-variant-numeric: tabular-nums;
+}
+.hc-tip-link {
+  all: unset; cursor: pointer; color: var(--paper); text-decoration: underline; text-underline-offset: 2px;
+  padding: 6px 0; margin: -6px 0; /* larger tap target without growing the line */
+}
+.hc-tip-link:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* Key line under a chart */
+.hc-key { margin: 0; display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); font: 400 13px/1.5 var(--font-sans); color: var(--ink-muted); }
+.hc-key span { display: inline-flex; align-items: center; gap: 6px; }
+.hc-key i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--ink); }
+.hc-key .hc-key-ship { border-top-style: dashed; }
+.hc-key .hc-key-profit { width: 10px; height: 10px; border: 1.5px solid var(--ink); border-radius: 50%; background: var(--best); }
+.hc-key .hc-key-look { border-top: 2px dotted var(--ripe-6); }
+.hc-key .hc-key-line { border-top-width: 2.5px; }
+.hc-key .hc-key-band { height: 10px; border: 0; background: var(--ink-muted); opacity: 0.35; }
+.hc-key .hc-key-past { border-top: 1.5px solid var(--ink-muted); }
+.hc-key .hc-key-sample { width: 8px; height: 8px; border: 2px solid var(--ink); border-radius: 50%; background: var(--paper); }
+
+/* "Show the numbers" */
+.hc-numbers summary { cursor: pointer; color: var(--brand); font: 500 14px/1.5 var(--font-sans); padding: var(--s-1) 0; }
+.hc-numbers summary:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.hc-table-wrap { overflow-x: auto; max-height: 320px; overflow-y: auto; }
+.hc-numbers table { border-collapse: collapse; width: 100%; font: 400 12px/1.5 var(--font-mono); font-variant-numeric: tabular-nums; }
+.hc-numbers th { text-align: left; font: 500 11px var(--font-sans); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-muted); position: sticky; top: 0; background: var(--paper); }
+.hc-numbers th, .hc-numbers td { padding: 4px 8px; border-bottom: 1px solid var(--hairline); white-space: nowrap; }
+
+/* Six-step ripeness bar */
+.hc-scale { display: grid; gap: 4px; }
+.hc-scale-bar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
+.hc-scale-bar i { display: block; height: 14px; border-radius: 2px; }
+.hc-scale-bar i.on { outline: 2px solid var(--ink); outline-offset: 2px; }
+.hc-scale-small { width: 120px; }
+.hc-scale-small .hc-scale-bar i { height: 10px; }
+.hc-scale-names { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; font: 400 11px/1.3 var(--font-sans); color: var(--ink-muted); text-align: center; }
+.hc-scale-names .on { color: var(--ink); font-weight: 600; }
