@@ -25,7 +25,7 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 | display_name | str | what the customer sees, e.g. "House 1" |
 | customer_id | str | |
 | area_m2 | number | room area used for € totals |
-| planted | date | 2024-09-03 |
+| planted | date | the room's planting date (D17: required per room; all demo rooms 2024-09-03) |
 | actual_harvest | date | replay only; shown as "what the grower actually did" |
 
 ### `days.json` — one row per room × today (the decision card)
@@ -45,6 +45,8 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 | conf_freshness_days | int | days since newest crop sample or usable photo (larger of the two) |
 | conf_reasons | list[str] | plain-English reasons, 1–3 |
 | conf_day_range_level, conf_agreement_level, conf_freshness_level | str | `high` · `medium` · `low` for each part (added at G2) |
+| optimal_from, optimal_to | date\|null | D16: first and last day of the optimal zone (profit within `economics.optimal_zone_share` of the best day) |
+| look_day | date\|null | D16: first day the room's forecast reaches the lower edge of `logistics.best_band_pct_red` (70% red); null if beyond the horizon |
 | weight_complete_day | date\|null | shipping extension (D14): day the fruit reaches 98% of its final weight |
 | k_x1000 | number | shipping extension: steepness of the room's ripening curve per 1,000 degree-days, so the app can plan any trip |
 
@@ -70,6 +72,9 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 Rows only where the pluck day is within the 21-day forecast.
 `room, today, destination (id), pluck_day, pluck_reason (weight|sellable|today), ship_by_day (date|null), pct_at_pluck, pct_on_arrival, sellable_on_arrival (0–1), best_from, best_until, sell_until (int: days after arrival), profit_m2_day, best_profit_day, profit_best_m2_day`
 `meta.destinations` = `[{id, name, distance_km, transit_days}]`; `meta.truck` = the logistics settings used (temperatures, hours, speed, band, end of life, minimum best days, default destination) plus what `app/trip.js` needs to plan a trip in the browser: `base_temp_c`, `pot_spread_sd`, `sellable_red_share`, `earliest_sellable_share`, `pot_z` (the 40 pot quantiles).
+
+### `explain.json` — one row per room × today × KPI (wave 2, L09)
+`room, today, kpi (best_day|pots_ready|profit_best|confidence|look_day|ship_day), meaning (str), steps (list[str]), inputs (list of {name, value, unit, source}), caveats (list[str])`. Plain English; every value also appears in another file or is a direct input. Drives the "How is this worked out?" panel (docs/DESIGN.md).
 
 ### `assumptions.json`
 `name, value, unit, source, if_wrong` — built from `config/crop.yaml`.

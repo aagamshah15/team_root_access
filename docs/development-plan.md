@@ -37,7 +37,17 @@ SPEC.md says **what** to build and wins on any detail. This file says **who buil
 | [L05](lanes/L05-assumptions-replication.md) | Assumptions, outside data & replication | `config/crop.yaml`, `docs/assumptions.md`, `docs/input-contract.md`, `scripts/outside_data/` | 1 | G1 | not started |
 | [L06](lanes/L06-review-story.md) | Fresh-eyes review, demo script & submission text | `reports/launch-review.md`, `docs/demo-script.md`, `docs/submission.md` | 3 | G3 | not started |
 
-At most five agents at once.
+**Wave 2 (UI/UX, D15–D18):**
+
+| ID | Lane | Owns (main paths) | Starts when | Status |
+|---|---|---|---|---|
+| [L07](lanes/L07-react-shell.md) | React shell, design system & screens | `web/` except charts and Add-a-room | approval | not started |
+| [L08](lanes/L08-charts.md) | Charts | `web/src/charts/` | approval | not started |
+| [L09](lanes/L09-pipeline-wave2.md) | Pipeline: optimal zone, look day, planting date, explanations | `harvest/explain.py`, publish/common/config for this wave | approval | not started |
+| [L10](lanes/L10-add-room.md) | Add-a-room form & input checks | `web/src/screens/AddRoom*`, `web/src/lib/validate*`, `docs/input-contract.md` | approval | not started |
+| L06 (again) | Review of the redesign, updated demo script | review and script | after wave-2 merge | not started |
+
+Design source of truth: `docs/DESIGN.md`. At most five agents at once.
 
 ---
 

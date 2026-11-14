@@ -51,3 +51,27 @@ Once a room has both a photo-timed estimate and a crop sample, the agreement che
 The grower asked for a pick date that loses no fruit weight and leaves the pots in best condition on the shelf after a truck trip. Pluck day = the latest of (1) the weight-complete day, when fruit reaches 98% of its final weight on a weight-vs-warmth S-curve fitted on the other rooms' weighings known by today (steepness held at the setting, timing fitted); (2) the first day at least 95% of pots would sell **on arrival**, after ripening in a 13 °C truck (pots are judged by the buyer on delivery); (3) today. The ship-by day is the last pluck day that still leaves 5+ days at 70–90% red in a 20 °C shop. Truck: one driver, 8 h a day at 70 km/h (560 km/day), same day up to 300 km; over 4 days is flagged for potted plants. Destinations are approximate road distances from Bleiswijk. The best-profit day and its profit are shown next to the pluck day so the cost of plucking earlier is visible. The days.json card gains `weight_complete_day` and `k_x1000`; `shipping.json` is added.
 
 Status: approved by the user on 14 Nov 2026 and live on `tomato-harvest-poc` (commit `61015a7`, also on `tomato-harvest-poc-shipping`). Known exception, accepted with it: the fruit-weight curve steepness (`growth.prior_steepness`) was fitted on all six rooms' full-season weighings, including the room being forecast and data after "today", and is used for every weight-complete date. That is outside the honest-testing rule (D6, D12); only the curve's timing is refitted on the other rooms' weighings known by today. Stated as a limit; a leave-one-room-out fit is a follow-up. Shipping profit excludes freight cost, and ripening in the truck and shop follows the greenhouse warmth clock (assumptions in `docs/assumptions.md`).
+
+## D15 · Design theme locked: the "mix"
+
+14 Nov 2026 · SPEC §8, `docs/DESIGN.md` · wave 2 (UI/UX)
+
+Crate-tag room cards, a harvest day strip as each room's hero (the dial was dropped), the six-step ripeness scale wherever ripeness appears, a field-log evidence trail, all on a quiet ruled console grid. Blue is the brand; green and red mean gain and loss only; amber means "check the crop"; the ripeness colours appear only inside the ripeness bar. Research and mockups: `docs/design/directions.html`. Approved by the user.
+
+## D16 · Optimal harvest zone and three harvest points
+
+14 Nov 2026 · SPEC §5, contract (to extend) · wave 2
+
+The light-blue optimal zone covers the days whose profit per m² per day is within 10% of the best day's (setting `economics.optimal_zone_share: 0.90`). Three harvest points are shown together: most profit (existing best day), best shelf look (first day the room reaches the 70% red lower edge of `logistics.best_band_pct_red`), and best for shipping (D14 pluck day for the chosen destination). Approved by the user.
+
+## D17 · Each room has its own planting date
+
+14 Nov 2026 · SPEC §3, `docs/input-contract.md`, pipeline · wave 2
+
+Planting date becomes a required input per room (degree-days, days grown and costs all count from it). The pipeline reads it per room instead of the fixed `PLANTED` of 3 Sep 2024 (all six demo rooms keep 3 Sep). The app gets an "Add a room" form: room name, area, planting date (required) and data files checked against the input contract; the forecast itself runs in the pipeline, as the app says. Approved by the user.
+
+## D18 · App rebuilt in React + TypeScript
+
+14 Nov 2026 · SPEC §0 D4, §8 · wave 2
+
+The redesign is built with Vite, React and TypeScript and still compiles to static files that read the same `app/data/` JSON, so it can be published as an artifact or hosted anywhere and later made installable on phones. The Python pipeline and data contract are unchanged except for D16/D17 additions. Approved by the user.
