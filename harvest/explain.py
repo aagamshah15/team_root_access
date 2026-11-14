@@ -125,7 +125,7 @@ def kpi_text(settings: dict) -> dict:
             title=f'Best day to pluck for {dest["name"]}',
             meaning=f'The day to pluck pots for {dest["name"]} so no fruit weight is lost, the pots sell on arrival, '
                     'and they stay in best condition on the shelf as long as possible.',
-            steps=['Fruit stops gaining weight on {weight_complete_day} (98% of final weight, curve fitted on the other rooms\' weighings).',
+            steps=['Fruit stops gaining weight on {weight_complete_day} (98% of final weight; curve shape from the other five rooms\' full season, timing from their weighings up to today).',
                    f'{dest["name"]} is about {dest["distance_km"]} km away: {{transit_days}} on the road in a '
                    f'{lg["transit_temp_c"]:g} °C truck, where pots keep ripening slowly.',
                    f'Pots must arrive with at least {need}% ready to sell, judged by the buyer on delivery.',
@@ -252,6 +252,6 @@ def meta_block(settings: dict) -> dict:
                        min_shelf=lg['min_best_shelf_days'],
                        range_limits=f"high ≤ {c['day_range_high_max']}, medium ≤ {c['day_range_medium_max']}",
                        fresh_limits=f"high ≤ {c['fresh_high_max']}, medium ≤ {c['fresh_medium_max']}"),
-        spread_sources={'fitted': 'Fitted on the other five rooms\' crop weighings up to today (dataset)',
-                        'setting': 'Setting, config/crop.yaml (too few crop weighings by today to fit it)'},
+        spread_sources={'fitted': 'Other five rooms\' full-season crop weighings, standing in for the grower\'s previous crop (dataset)',
+                        'setting': 'Setting, config/crop.yaml (the fit on the other rooms failed)'},
     )

@@ -111,7 +111,7 @@ def test_published_cards_have_d16_fields():
         assert r['look_day'] is None or r['look_day'] >= r['today']
 
 
-# ---------------------------------------------------------------- D19: leave-one-room-out steepness and spread
+# ---------------------------------------------------------------- D19: previous-crop stand-ins (other five rooms, full season)
 
 def _rip(rows):
     import pandas as pd
@@ -119,38 +119,36 @@ def _rip(rows):
                          for r, d, s, n, m, sd in rows])
 
 
-def test_plant_spread_pooled_on_other_rooms_only():
+def test_plant_spread_pooled_on_other_rooms_full_season():
     from types import SimpleNamespace
     from harvest.economics import plant_spread
     st = {'ripeness': dict(plant_spread_sd=12.5, spread_mid_pct=[5, 95], spread_min_rooms=3)}
     d5 = date(2024, 11, 5)
     rip = _rip([('own', d5, 'destructive', 6, 40.0, 30.0),           # the room itself: left out
                 ('a', d5, 'destructive', 6, 30.0, 6.0), ('b', d5, 'destructive', 6, 50.0, 8.0),
-                ('c', d5, 'destructive', 11, 20.0, 10.0),
+                ('c', date(2024, 11, 20), 'destructive', 11, 20.0, 10.0),   # after "today": used (full season)
                 ('d', d5, 'destructive', 6, 2.0, 40.0),               # not mid-ripening (2 % red): left out
-                ('e', d5, 'final', 50, 60.0, 40.0),                   # harvest-day count: left out
-                ('f', date(2024, 11, 7), 'destructive', 6, 50.0, 40.0)])   # after today: left out
-    inp = SimpleNamespace(ripeness=rip)
-    got = plant_spread(inp, 'own', date(2024, 11, 6), st)
+                ('e', d5, 'final', 50, 60.0, 40.0)])                  # harvest-day count: left out
+    got = plant_spread(SimpleNamespace(ripeness=rip), 'own', date(2024, 10, 25), st)
     # pooled: (5 x 36 + 5 x 64 + 10 x 100) / (5 + 5 + 10) = (180 + 320 + 1000) / 20 = 75 -> sqrt 8.660
     assert got['fitted'] and got['rooms'] == 3 and got['sd'] == pytest.approx(8.660, abs=1e-3)
-    # only two usable other rooms before 5 Nov data is in -> fall back to the setting
-    few = plant_spread(SimpleNamespace(ripeness=rip[rip.room.isin(['own', 'a', 'b'])]), 'own', date(2024, 11, 6), st)
+    # only two usable other rooms -> fall back to the setting
+    few = plant_spread(SimpleNamespace(ripeness=rip[rip.room.isin(['own', 'a', 'b'])]), 'own', d5, st)
     assert not few['fitted'] and few['sd'] == 12.5
 
 
-def test_plant_spread_real_ideas_6_nov():
-    """Real data: ideas on 6 Nov uses the other five rooms' 5 Nov sds 7.80, 11.55, 12.97, 9.34, 10.83 ->
-    mean variance (60.84 + 133.40 + 168.22 + 87.24 + 117.29) / 5 = 113.40 -> 10.65 points."""
+def test_plant_spread_real_ideas_any_day():
+    """Real data: ideas uses the other five rooms' 5 Nov sds 7.80, 11.55, 12.97, 9.34, 10.83 ->
+    mean variance (60.84 + 133.40 + 168.22 + 87.24 + 117.29) / 5 = 113.40 -> 10.65 points, on every today."""
     days = json.loads((common.REPO / 'app' / 'data' / 'days.json').read_text())['rows']
-    r = [x for x in days if x['room'] == 'ideas' and x['today'] == '2024-11-06']
+    r = [x for x in days if x['room'] == 'ideas']
     if not r or 'pot_spread_sd' not in r[0]:
         pytest.skip('app/data not rebuilt with D19 yet')
-    assert r[0]['pot_spread_sd'] == pytest.approx(10.65, abs=0.01)
+    assert all(x['pot_spread_sd'] == pytest.approx(10.65, abs=0.01) for x in r)
 
 
-GROWTH_FREE = {'growth': dict(complete_share=0.98, prior_steepness=0.0148, prior_half_gdd=474.0, min_rooms=3,
-                              fit_steepness=True, steepness_bounds=[0.003, 0.1])}
+GROWTH_PREV = {'growth': dict(complete_share=0.98, prior_steepness=0.0148, prior_half_gdd=474.0, min_rooms=3,
+                              steepness_from='other_rooms_full_season', steepness_bounds=[0.003, 0.1])}
 
 
 def _weighings(a, g_half, rooms=('a', 'b', 'c', 'd'), g=(350, 500, 650, 900)):
@@ -160,20 +158,35 @@ def _weighings(a, g_half, rooms=('a', 'b', 'c', 'd'), g=(350, 500, 650, 900)):
                          for i, r in enumerate(rooms) for x in g])
 
 
-def test_free_steepness_is_recovered():
-    from harvest.growth import complete_gdd, fit_growth
-    # weighings made with a 0.012 and g_half 500 -> both recovered; finished growing at
-    # 500 + ln(49) / 0.012 = 500 + 324.3 = 824.3 dd (against 737 dd with the old fixed 0.0148)
-    fit = fit_growth(_weighings(0.012, 500), GROWTH_FREE)
-    assert fit['steepness_fitted'] and fit['a'] == pytest.approx(0.012, rel=1e-3)
+def test_previous_crop_steepness_is_recovered():
+    from harvest.growth import complete_gdd, fit_growth, fit_steepness
+    # weighings made with a 0.012 and g_half 500 -> steepness recovered; with it held, the timing fit
+    # recovers g_half too: finished growing at 500 + ln(49) / 0.012 = 500 + 324.3 = 824.3 dd
+    steep = fit_steepness(_weighings(0.012, 500), GROWTH_PREV)
+    assert steep['fitted'] and steep['a'] == pytest.approx(0.012, rel=1e-3)
+    fit = fit_growth(_weighings(0.012, 500), GROWTH_PREV, a=steep['a'])
     assert fit['g_half'] == pytest.approx(500, abs=0.5)
     assert complete_gdd(fit['a'], fit['g_half'], 0.98) == pytest.approx(824.3, abs=1)
 
 
-def test_free_steepness_on_bound_falls_back_to_setting():
-    from harvest.growth import fit_growth
-    # flat weighings (no growth at all) push the steepness to a bound -> not trusted, setting used
+def test_previous_crop_steepness_on_bound_falls_back_to_setting():
     import pandas as pd
+    from harvest.growth import fit_steepness
+    # flat weighings (no growth at all) push the steepness to a bound -> not trusted, setting used
     flat = pd.DataFrame([dict(room=r, gdd_cum=float(x), fw_total=300.0) for r in 'abcd' for x in (350, 500, 650, 900)])
-    fit = fit_growth(flat, GROWTH_FREE)
-    assert not fit['steepness_fitted'] and fit['a'] == 0.0148
+    fit = fit_steepness(flat, GROWTH_PREV)
+    assert not fit['fitted'] and fit['a'] == 0.0148
+
+
+def test_previous_crop_steepness_leaves_out_the_room():
+    """The held-out room's weighings never enter its own steepness fit."""
+    from types import SimpleNamespace
+    from harvest.growth import previous_crop_steepness
+    s = pd_concat(_weighings(0.012, 500), _weighings(0.03, 500, rooms=('x',)))
+    inp = SimpleNamespace(ripeness=s)
+    assert previous_crop_steepness(inp, 'x', GROWTH_PREV)['a'] == pytest.approx(0.012, rel=1e-3)
+
+
+def pd_concat(*frames):
+    import pandas as pd
+    return pd.concat(frames, ignore_index=True)

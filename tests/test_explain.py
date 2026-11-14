@@ -55,7 +55,7 @@ def test_expand_gives_contract_rows_with_filled_steps():
     assert '€14.96 per m² divided by 68 days grown = €0.220 per m² per day' in by['profit_best']['steps'][2]
     assert 'Sun 10 Nov' in by['look_day']['steps'][-1]
     assert 'Thu 7 Nov, because enough pots would sell on arrival' in by['ship_day']['steps'][-1]
-    assert by['pots_ready']['inputs'][1]['source'].startswith('Fitted on the other five rooms')
+    assert by['pots_ready']['inputs'][1]['source'].startswith("Other five rooms' full-season")
 
 
 def test_published_explain_matches_cards():
@@ -73,4 +73,5 @@ def test_published_explain_matches_cards():
         v = row['values']
         # profit on the best day = net profit per m² / days grown (card rounded to 3 places)
         assert v['net_m2'] / v['days_grown'] == pytest.approx(card['profit_best_m2_day'], abs=6e-4)
-        assert v['density'] * v['price_per_pot'] == pytest.approx(v['revenue_m2'], rel=1e-3)
+        # price per pot is published to 4 places: up to 56 pots x 0.00005 = 0.003 of rounding
+        assert v['density'] * v['price_per_pot'] == pytest.approx(v['revenue_m2'], rel=1e-3, abs=0.003)

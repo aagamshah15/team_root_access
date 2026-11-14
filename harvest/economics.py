@@ -80,20 +80,22 @@ def profit_m2_day(revenue_per_pot: float, density: float, running_cost_m2: float
 # ---------------------------------------------------------------- inputs a room's curve needs
 
 def plant_spread(inputs: Inputs, room: str, today: date, settings: dict) -> dict:
-    """Plant-to-plant spread in % red (points), fitted on the *other* rooms' crop weighings known by today.
+    """Plant-to-plant spread in % red (points), standing in for "the grower's previous crop" (D19).
 
-    Honest testing (D6, D19): the room's own weighings and anything dated after today are left out.
-    Spread = pooled sd of % red across plants, over the other rooms' regular crop samples (not the
-    harvest-day count) taken while the room was mid-ripening (mean % red inside `ripeness.spread_mid_pct`),
-    pooled as sqrt(sum((n - 1) sd^2) / sum(n - 1)). With fewer than `ripeness.spread_min_rooms` rooms
-    the setting `ripeness.plant_spread_sd` is used instead, and `fitted` says so.
-    Hand check, ideas on 6 Nov 2024: the other five rooms' 5 Nov sds 7.80, 11.55, 12.97, 9.34, 10.83 (6 plants
-    each) -> variances 60.84, 133.40, 168.22, 87.24, 117.29 -> mean 113.40 -> sqrt = 10.65 points.
+    Fitted on the *other five* rooms' complete-season crop weighings; the held-out room never contributes.
+    Caveat: this uses weighings dated after "today", as in the timing test; in production it would be last
+    season's crop. `today` is kept for the signature but not used.
+    Spread = pooled sd of % red across plants, over the regular crop samples (not the harvest-day count)
+    taken while a room was mid-ripening (mean % red inside `ripeness.spread_mid_pct`), pooled as
+    sqrt(sum((n - 1) sd^2) / sum(n - 1)). With fewer than `ripeness.spread_min_rooms` such rooms the
+    setting `ripeness.plant_spread_sd` is used, and `fitted` says so.
+    Hand check, ideas: the other five rooms' 5 Nov sds 7.80, 11.55, 12.97, 9.34, 10.83 (6 plants each) ->
+    variances 60.84, 133.40, 168.22, 87.24, 117.29 -> mean 113.40 -> sqrt = 10.65 points.
     Returns {sd, fitted, rooms}.
     """
     rs = settings['ripeness']
     lo, hi = rs.get('spread_mid_pct', [5, 95])
-    r = known_by(inputs.ripeness, today)
+    r = inputs.ripeness
     r = r[(r.room != room) & (r['sample'] != 'final') & r.pct_red_weight.between(lo, hi)]
     r = r.dropna(subset=['pct_red_weight_sd', 'plants'])
     r = r[r.plants >= 2]
@@ -149,7 +151,7 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
     `fc` is L01's forecast (date, pct_red, pct_red_low, pct_red_high). `params` is accepted for the
     contract but not needed: the pot spread works from % red alone (see `plant_pct`).
     `extra_cost_m2_day` is added to the cost rate for future days (the temperature what-if).
-    The pot spread is fitted on the other rooms' weighings known by today (`plant_spread`).
+    The pot spread comes from the other five rooms' full-season weighings (`plant_spread`, D19).
     `transit_dd` > 0 judges and pays the pots on arrival: each pot ripens by that many degree-days on
     the room's curve (steepness params['k']) before the sale rule and price apply (shipping extension).
 
@@ -159,7 +161,7 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
     """
     s = settings or load_settings()
     econ = s['economics']
-    spread = plant_spread(inputs, room, today, s)['sd']   # D19: fitted on the other rooms, data up to today
+    spread = plant_spread(inputs, room, today, s)['sd']   # D19: other five rooms, full season (previous-crop stand-in)
     planted = room_planted(room)   # D17: days grown count from the room's own planting date
     fw = fruit_weight(inputs, room, today)
     c = costs_so_far(inputs, room, today, econ)

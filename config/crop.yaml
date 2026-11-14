@@ -17,9 +17,11 @@ ripeness:
   onset_red_index: 0.1       # main's forecast.py ONSET_MIN: % of photo that is red fruit, 3 days running = ripening started
   onset_days: 3              # main's photo-onset rule (SPEC §4)
   rate_days: 7               # Team choice (SPEC §4): future warmth per day = mean of the last N days
-  plant_spread_sd: 12.5      # Data: pooled sd of % red across plants in the 5 Nov hand weighings, all six rooms (main, README). D19: only a fallback now
-  spread_mid_pct: [5, 95]    # D19 team choice: weighings used to fit the spread must have a room mean in this range of % red (mid-ripening)
-  spread_min_rooms: 3        # D19 team choice: fit the spread on the other rooms once this many have such a weighing by today, else use plant_spread_sd
+  plant_spread_sd: 12.5      # Data: pooled sd of % red across plants in the 5 Nov hand weighings, all six rooms (main, README). D19: fallback only, if the fit below fails
+  # D19 (user decision "five rooms, full season"): each room's spread is fitted on the OTHER five rooms' complete-season weighings,
+  # standing in for the grower's previous crop. Caveat: uses weighings dated after "today", as in the timing test.
+  spread_mid_pct: [5, 95]    # D19 team choice: weighings used for the spread must have a room mean in this range of % red (mid-ripening)
+  spread_min_rooms: 3        # D19 team choice: at least this many other rooms with such a weighing, else plant_spread_sd
   horizon_days: 21           # Team choice (SPEC §5): days ahead the harvest window looks
   # D12: starting guess used only before any room has a ripe crop sample (strict "known by today").
   prior_k: 0.03              # main's forecast.py starting value for the curve slope
@@ -53,8 +55,8 @@ economics:
 
 growth:                      # Shipping extension: when fruit stops gaining weight (harvest/growth.py)
   complete_share: 0.98       # Team choice: fruit counts as "finished growing" at 98% of its final weight
-  prior_steepness: 0.0148    # Data: fruit-weight S-curve steepness per degree-day, fitted on all six rooms' weighings (full season). D19: only a fallback now (before 3 weighings exist). In production: the grower's previous crop
-  fit_steepness: true        # D19 (user request): fit the steepness on the other five rooms' weighings known by today
+  prior_steepness: 0.0148    # Data: fruit-weight S-curve steepness per degree-day, fitted on all six rooms' weighings (full season). D19: fallback only, if the fit below fails. In production: the grower's previous crop
+  steepness_from: other_rooms_full_season   # D19 (user decision): steepness fitted per room on the OTHER five rooms' complete-season weighings, standing in for the grower's previous crop. Caveat: uses weighings dated after "today", as in the timing test. Any other value: use prior_steepness
   steepness_bounds: [0.003, 0.1]   # Team choice: plausible range per degree-day; a fit ending on a bound falls back to prior_steepness
   prior_half_gdd: 474.0      # Data: degree-days at half the final fruit weight, same fit; used only before 3 weighings exist
   min_rooms: 3               # Team choice: fit the timing on today's weighings once this many other rooms have 3+
@@ -136,7 +138,7 @@ assumptions:
   - name: Plant-to-plant spread in ripeness (fallback)
     key: ripeness.plant_spread_sd
     unit: points of % red
-    source: 5 Nov hand weighings, 6 plants per room (dataset). From 5 Nov each room uses the spread fitted on the other five rooms' weighings up to today; this value only before then
+    source: 5 Nov hand weighings (dataset). Each room actually uses the spread of the other five rooms' full-season weighings (standing in for the grower's previous crop; includes weighings after "today"); this value only if that fit fails
     if_wrong: Wider spread delays the day 95% of pots are sellable.
   - name: Future warmth and cost per day
     key: ripeness.rate_days
@@ -161,7 +163,7 @@ assumptions:
   - name: Fruit-weight curve steepness (fallback)
     key: growth.prior_steepness
     unit: per degree-day
-    source: Fitted on all six rooms' weighings (this season); used only until three weighings exist (before 5 Nov), after which each room's steepness is fitted on the other five rooms' weighings up to today. In production, the grower's previous crop
+    source: Fitted on all six rooms' weighings (this season). Each room actually uses a steepness fitted on the other five rooms' full-season weighings (standing in for the grower's previous crop; includes weighings after "today"); this value only if that fit fails
     if_wrong: A flatter curve finishes growing later, so the pluck day moves later.
   - name: Truck temperature
     key: logistics.transit_temp_c

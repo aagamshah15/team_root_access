@@ -112,7 +112,7 @@ def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict
     ships = [compact_ship(room, today, plan) for plan in plans.values()]
     ships = [r for r in ships if r is not None]
     spread = plant_spread(inputs, room, today, settings)   # D19: the same spread profit_by_day used
-    card['pot_spread_sd'] = spread['sd']   # D19: varies by room-day now; app/trip.js should read it instead of meta.truck
+    card['pot_spread_sd'] = spread['sd']   # D19: differs by room (other five rooms' weighings); app/trip.js reads it
     explain = dict(room=room, today=today, values=room_day_values(
         card, curve, p, plans[settings['logistics']['default_destination']], settings, spread))
     rows = [dict(room=room, today=today, date=r.date, pct_red=r.pct_red, pct_red_low=r.pct_red_low,
