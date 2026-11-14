@@ -242,8 +242,9 @@ def optimal_zone(curve: pd.DataFrame, best_day: date, share: float) -> dict:
 
     Starting at the best day, the zone grows one day at a time in each direction while the profit per m²
     per day stays at or above the threshold, so it is always one unbroken run of days that contains the
-    best day. Threshold = best - (1 - share) x |best|: with share 0.90 that is 90 % of a positive best
-    profit, and for a loss-making room (negative best) a loss at most 10 % bigger.
+    best day. Threshold = share x best: with share 0.90, 90 % of the best day's profit.
+    No zone when the best day's profit is zero or less: "within 10 % of the best" means nothing when every
+    day loses money, so both dates are None (L08 review).
     Hand check, share 0.9, profits [0.02, 0.05, 0.095, 0.10, 0.092, 0.08] with the best on day 3:
     threshold 0.09 -> days 2..4 (0.095, 0.10, 0.092); day 5 (0.08) and day 1 (0.05) fall outside.
     Returns {optimal_from, optimal_to}.
@@ -251,7 +252,9 @@ def optimal_zone(curve: pd.DataFrame, best_day: date, share: float) -> dict:
     c = curve.reset_index(drop=True)
     i = int(c.index[c.date == best_day][0])
     best = float(c.profit_m2_day[i])
-    floor = best - (1 - share) * abs(best)
+    if best <= 0:
+        return dict(optimal_from=None, optimal_to=None)
+    floor = share * best
     lo = hi = i
     while lo - 1 >= 0 and c.profit_m2_day[lo - 1] >= floor:
         lo -= 1

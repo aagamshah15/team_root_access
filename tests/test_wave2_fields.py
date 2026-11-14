@@ -83,12 +83,14 @@ def test_optimal_zone_is_contiguous_around_best():
     assert (z['optimal_from'], z['optimal_to']) == (TODAY + timedelta(days=2), TODAY + timedelta(days=3))
 
 
-def test_optimal_zone_loss_making_room():
+def test_no_optimal_zone_when_best_day_does_not_make_money():
     from harvest.economics import optimal_zone
-    # best -0.10 -> threshold -0.10 - 0.1 x 0.10 = -0.11: day 1 (-0.105) in, day 0 (-0.12) and day 3 (-0.115) out
-    c = _curve([-0.12, -0.105, -0.10, -0.115])
-    z = optimal_zone(c, TODAY + timedelta(days=2), 0.9)
-    assert (z['optimal_from'], z['optimal_to']) == (TODAY + timedelta(days=1), TODAY + timedelta(days=2))
+    # every day loses money (best -0.10): "within 10 % of the best" has no meaning -> no zone
+    z = optimal_zone(_curve([-0.12, -0.105, -0.10, -0.115]), TODAY + timedelta(days=2), 0.9)
+    assert z == dict(optimal_from=None, optimal_to=None)
+    # best exactly 0 -> no zone either
+    z0 = optimal_zone(_curve([-0.02, 0.0, -0.01]), TODAY + timedelta(days=1), 0.9)
+    assert z0 == dict(optimal_from=None, optimal_to=None)
 
 
 def test_look_day_hand_worked():
@@ -107,7 +109,10 @@ def test_published_cards_have_d16_fields():
     if 'optimal_from' not in days[0]:
         pytest.skip('app/data not rebuilt with D16 fields yet')
     for r in days:
-        assert r['optimal_from'] <= r['best_day'] <= r['optimal_to']
+        if r['profit_best_m2_day'] <= 0:
+            assert r['optimal_from'] is None and r['optimal_to'] is None
+        else:
+            assert r['optimal_from'] <= r['best_day'] <= r['optimal_to']
         assert r['look_day'] is None or r['look_day'] >= r['today']
 
 
