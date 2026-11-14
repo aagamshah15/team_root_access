@@ -10,6 +10,9 @@
 # area_m2: the room area used to turn € per m² into € per room. Every room in the
 # challenge is the same compartment, so all six use the same value; it must match
 # economics.area_m2 in config/crop.yaml (L05 confirms the compartment size).
+#
+# planted (D17, required per room): degree-days, days grown, costs, evidence and the "today"
+# range all count from it. All six demo rooms were transplanted on 3 Sep 2024.
 customers:
   - customer_id: c1
     name: Willowmere Greenhouses
@@ -18,9 +21,11 @@ customers:
       - room: mugrow
         display_name: House 1 · North
         area_m2: 96.0
+        planted: 2024-09-03   # D17: planting date per room (Maree et al. 2025 §2.1: all six rooms transplanted 3 Sep 2024)
       - room: trigger
         display_name: House 2 · South
         area_m2: 96.0
+        planted: 2024-09-03   # D17: planting date per room (Maree et al. 2025 §2.1: all six rooms transplanted 3 Sep 2024)
   - customer_id: c2
     name: Bramblecote Growers
     tagline: Garden-centre supplier, two trial rooms for dwarf tomato
@@ -28,9 +33,11 @@ customers:
       - room: ideas
         display_name: Bay A
         area_m2: 96.0
+        planted: 2024-09-03   # D17: planting date per room (Maree et al. 2025 §2.1: all six rooms transplanted 3 Sep 2024)
       - room: agrifusion
         display_name: Bay B
         area_m2: 96.0
+        planted: 2024-09-03   # D17: planting date per room (Maree et al. 2025 §2.1: all six rooms transplanted 3 Sep 2024)
   - customer_id: c3
     name: Fennick Hollow Produce
     tagline: Co-op of small growers sharing two lit rooms
@@ -38,6 +45,8 @@ customers:
       - room: reference
         display_name: Room East
         area_m2: 96.0
+        planted: 2024-09-03   # D17: planting date per room (Maree et al. 2025 §2.1: all six rooms transplanted 3 Sep 2024)
       - room: tomatonuts
         display_name: Room West
         area_m2: 96.0
+        planted: 2024-09-03   # D17: planting date per room (Maree et al. 2025 §2.1: all six rooms transplanted 3 Sep 2024)

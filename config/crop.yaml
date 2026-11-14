@@ -9,7 +9,7 @@
 # D10 (14 Nov 2026): price and re-spacing cost now follow the paper, as approved by the user.
 
 crop: dwarf tomato (potted, sold as whole pots)   # Paper §2.2: 'Pick-&-Joy Red Cherry', 13 cm pots
-planted: 2024-09-03          # Paper §2.1: transplanting on 3 Sep 2024 (all rooms)
+planted: 2024-09-03          # Paper §2.1: transplanting on 3 Sep 2024 (all rooms). D17: the pipeline reads each room's own date from config/customers.yaml; this is the default
 base_temp_c: 10.0            # Convention for tomato degree-days; matches main's gdd_cum (first day 22.7 °C -> 12.7). Not checked in a primary source.
 
 ripeness:

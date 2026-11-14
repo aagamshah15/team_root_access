@@ -15,7 +15,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from harvest.common import REPO, ROOMS, PLANTED, Inputs, actual_harvest, load_inputs, load_settings, today_range
+from harvest.common import REPO, ROOMS, Inputs, planted, actual_harvest, load_inputs, load_settings, today_range
 from harvest.confidence import confidence
 from harvest.economics import harvest_window, profit_by_day
 from harvest.evidence import evidence_rows
@@ -124,7 +124,7 @@ def customers_and_rooms(inputs: Inputs) -> tuple[list[dict], list[dict]]:
     customers = [dict(customer_id=c['customer_id'], name=c['name'], tagline=c['tagline'],
                       rooms=[r['room'] for r in c['rooms']]) for c in cfg]
     rooms = [dict(room=r['room'], display_name=r['display_name'], customer_id=c['customer_id'], area_m2=r['area_m2'],
-                  planted=PLANTED, actual_harvest=actual_harvest(inputs, r['room'])) for c in cfg for r in c['rooms']]
+                  planted=planted(r['room']), actual_harvest=actual_harvest(inputs, r['room'])) for c in cfg for r in c['rooms']]
     assert sorted(r['room'] for r in rooms) == ROOMS, 'every room must belong to exactly one demo customer'
     return customers, rooms
 

@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from harvest.common import PLANTED, Inputs, known_by, load_settings
+from harvest.common import Inputs, known_by, load_settings, planted as room_planted
 from harvest.logistics import ripen
 
 # 40 pots placed at evenly spaced normal quantiles: a smooth, repeatable stand-in for "a room of pots".
@@ -133,7 +133,7 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
     """
     s = settings or load_settings()
     econ, spread = s['economics'], s['ripeness']['plant_spread_sd']
-    planted = s.get('planted', PLANTED)
+    planted = room_planted(room)   # D17: days grown count from the room's own planting date
     fw = fruit_weight(inputs, room, today)
     c = costs_so_far(inputs, room, today, econ)
     plants_m2 = c['density'] * econ['plant_cost_eur']
