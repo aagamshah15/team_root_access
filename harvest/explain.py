@@ -41,7 +41,6 @@ def kpi_text(settings: dict) -> dict:
     as {key} placeholders."""
     e, lg = settings['economics'], settings['logistics']
     need = round(100 * e['earliest_sellable_share'])
-    zone = round(100 * (1 - e['optimal_zone_share']))
     third = 'one third'
     lo, hi = lg['best_band_pct_red']
     dest = next(d for d in lg['destinations'] if d['id'] == lg['default_destination'])
@@ -56,7 +55,7 @@ def kpi_text(settings: dict) -> dict:
                    'minus all costs so far and the daily running cost of {cost_rate_m2_day}, divided by the days grown.',
                    f'Pick the most profitable day among days with at least {need}% of pots ready to sell: {{best_day}}. '
                    'If the crop ripens a little faster or slower, the best day falls between {best_day_low} and {best_day_high}.',
-                   f'Days within {zone}% of the best day\'s profit make the optimal harvest zone: {{optimal_from}} to {{optimal_to}}.'],
+                   '{zone_sentence}'],
             inputs=[_inp('Fruit red today (estimated)', 'pct_red_now', 'pct', '% of fruit weight', SRC_FIT),
                     _inp('Ripening model used', 'model_words', 'text', '', SRC_FIT),
                     _inp('Warmth per day ahead', 'gdd_rate', 'dd_day', 'degree-days a day', SRC_DATA + ', last 7 days'),
@@ -215,6 +214,12 @@ def expand(meta: dict, row: dict, card: dict) -> list[dict]:
     consts = dict(meta['constants'])
     consts['model_words'] = MODEL_WORDS.get(card.get('model'), card.get('model'))
     consts['pluck_reason_words'] = REASON_WORDS.get(row['values'].get('pluck_reason'), 'there is no plan yet')
+    zone = round(100 * (1 - float(consts['zone_share'])))
+    consts['zone_sentence'] = (
+        f'No optimal harvest zone today: even the best day is estimated to lose money, so "within {zone}% of '
+        'the best day\'s profit" has no meaning.' if card.get('optimal_from') is None else
+        f'Days within {zone}% of the best day\'s profit make the optimal harvest zone: '
+        f'{display(card["optimal_from"], "date")} to {display(card["optimal_to"], "date")}.')
     consts['spread_source'] = meta['spread_sources']['fitted' if row['values'].get('spread_fitted') else 'setting']
     kinds = dict(KINDS)
     for k in meta['kpis'].values():

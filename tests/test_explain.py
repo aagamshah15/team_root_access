@@ -52,6 +52,9 @@ def test_expand_gives_contract_rows_with_filled_steps():
     by = {r['kpi']: r for r in out}
     assert 'Sat 9 Nov' in by['best_day']['steps'][3]
     assert 'Fri 8 Nov to Tue 12 Nov' in by['best_day']['steps'][4]
+    # a room losing money on its best day has no zone, and the step says so
+    loss = expand(meta, row, dict(card, profit_best_m2_day=-0.01, optimal_from=None, optimal_to=None))
+    assert loss[0]['steps'][4].startswith('No optimal harvest zone today')
     assert '€14.96 per m² divided by 68 days grown = €0.220 per m² per day' in by['profit_best']['steps'][2]
     assert 'Sun 10 Nov' in by['look_day']['steps'][-1]
     assert 'Thu 7 Nov, because enough pots would sell on arrival' in by['ship_day']['steps'][-1]
