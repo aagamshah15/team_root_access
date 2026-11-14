@@ -78,6 +78,11 @@ export function expandKpi(meta: CompactMeta, row: CompactRow, card: DayCard, kpi
     pluck_reason_words: REASON_WORDS[String(values.pluck_reason)] ?? 'there is no plan yet',
     spread_source: meta.spread_sources?.[values.spread_fitted ? 'fitted' : 'setting'] ?? '',
   };
+  // zone_sentence: mirrors harvest/explain.py expand() (L09 a5be9f5), including the no-zone case.
+  const zonePct = Math.round(100 * (1 - Number((meta.constants ?? {} as Record<string, unknown>).zone_share ?? 0.9)));
+  consts.zone_sentence = card.optimal_from == null
+    ? `No optimal harvest zone today: even the best day is estimated to lose money, so "within ${zonePct}% of the best day's profit" has no meaning.`
+    : `Days within ${zonePct}% of the best day's profit make the optimal harvest zone: ${display(card.optimal_from, 'date')} to ${display(card.optimal_to, 'date')}.`;
   const kinds: Record<string, string> = { ...KINDS };
   for (const k of Object.values(meta.kpis)) for (const i of k?.inputs ?? []) kinds[i.key] = i.kind;
   const cardRec = card as unknown as Record<string, unknown>;

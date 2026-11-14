@@ -40,7 +40,8 @@ describe('expandKpi', () => {
     for (const r of doc.rows) {
       for (const k of ['best_day', 'pots_ready', 'profit_best', 'confidence', 'look_day', 'ship_day'] as const) {
         const ex = expandKpi(doc.meta, r, cards.get(`${r.room}|${r.today}`)!, k)!;
-        const text = [ex.meaning, ...ex.steps, ...ex.inputs.map((i) => `${i.value} ${i.source}`)].join(' ');
+        // An input may legitimately read "—" when its value is null, e.g. no optimal zone on a loss-making day (L09 a5be9f5).
+        const text = [ex.meaning, ...ex.steps, ...ex.inputs.filter((i) => i.value !== '—').map((i) => `${i.value} ${i.source}`)].join(' ');
         expect(text, `${r.room} ${r.today} ${k}`).not.toMatch(/\{\w+\}|— |NaN|undefined/);
       }
     }
