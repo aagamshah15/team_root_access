@@ -23,6 +23,7 @@ from harvest.alerts import alerts
 from harvest.backtest import timing_test
 from harvest.forecast import fit_params, forecast
 from harvest.growth import weight_complete_day
+from harvest.explain import meta_block as explain_meta, room_day_values
 from harvest.shipping import ship_plan
 from harvest.logistics import transit_days
 from harvest.economics import Z
@@ -78,8 +79,9 @@ def compact_ship(room: str, today: date, r: dict) -> dict | None:
 
 
 def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict
-             ) -> tuple[dict, list[dict], list[dict], list[dict]]:
-    """One decision card, its 22-day forecast rows, what-if rows and shipping rows, all from one fit."""
+             ) -> tuple[dict, list[dict], list[dict], list[dict], dict]:
+    """One decision card, its 22-day forecast rows, what-if rows, shipping rows and explain.json row, all
+    from one fit."""
     horizon = int(settings['ripeness']['horizon_days'])
     p = fit_params(inputs, room, today, settings)
     fc = forecast(inputs, room, today, horizon=horizon, settings=settings, params=p)
@@ -105,9 +107,13 @@ def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict
     weight = weight_complete_day(inputs, room, today, p['gdd_today'], p['gdd_rate'], settings)
     card['weight_complete_day'] = weight['day']   # shipping extension: fruit stops gaining weight
     card['k_x1000'] = p['k'] * 1000               # curve steepness per 1000 dd (keeps precision after 4-dp rounding) for app/trip.js
-    ships = [compact_ship(room, today, ship_plan(inputs, room, today, settings, p, fc, dest, weight))
-             for dest in settings['logistics']['destinations']]
+    plans = {dest['id']: ship_plan(inputs, room, today, settings, p, fc, dest, weight)
+             for dest in settings['logistics']['destinations']}
+    ships = [compact_ship(room, today, plan) for plan in plans.values()]
     ships = [r for r in ships if r is not None]
+    spread = dict(sd=float(settings['ripeness']['plant_spread_sd']), fitted=False)
+    explain = dict(room=room, today=today, values=room_day_values(
+        card, curve, p, plans[settings['logistics']['default_destination']], settings, spread))
     rows = [dict(room=room, today=today, date=r.date, pct_red=r.pct_red, pct_red_low=r.pct_red_low,
                  pct_red_high=r.pct_red_high, sellable_share=r.sellable_share, profit_m2_day=r.profit_m2_day,
                  profit_low=r.profit_low, profit_high=r.profit_high, cost_to_date_m2=r.cost_to_date_m2)
@@ -117,7 +123,7 @@ def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict
                                                                         settings=settings, params=p)
     wi = [dict(room=room, today=today, **whatif(inputs, room, today, d, forecast_fn=fc_fn, params_fn=fixed,
                                                   settings=settings, heat=heat)) for d in DELTAS]
-    return card, rows, wi, ships
+    return card, rows, wi, ships, explain
 
 
 def customers_and_rooms(inputs: Inputs) -> tuple[list[dict], list[dict]]:
@@ -169,11 +175,11 @@ def main() -> int:
     as_of = (todays[0], todays[-1])
     heat_by_day = {t: heating_cost_per_degree(inputs, t) for t in todays}
 
-    cards, fc_rows, wi_rows, ship_rows = [], [], [], []
+    cards, fc_rows, wi_rows, ship_rows, explain_rows = [], [], [], [], []
     for room in ROOMS:
         for t in today_range(inputs, room):
-            c, f, w, sh = room_day(inputs, room, t, settings, heat_by_day[t])
-            cards.append(c); fc_rows += f; wi_rows += w; ship_rows += sh
+            c, f, w, sh, ex = room_day(inputs, room, t, settings, heat_by_day[t])
+            cards.append(c); fc_rows += f; wi_rows += w; ship_rows += sh; explain_rows.append(ex)
     summary, per_room = timing_test(inputs, settings)
 
     write('customers', customers, as_of)
@@ -200,6 +206,7 @@ def main() -> int:
         sellable_red_share=settings['economics']['sellable_red_share'],
         earliest_sellable_share=settings['economics']['earliest_sellable_share'],
         pot_z=[round(float(z), 5) for z in Z]))
+    write('explain', explain_rows, as_of, **explain_meta(settings))   # compact form: see harvest/explain.py
     size = sum(p.stat().st_size for p in OUT.rglob('*') if p.is_file()) / 1e6
     print(f'publish: {len(cards)} decision cards, {len(fc_rows)} forecast rows, {len(wi_rows)} what-if rows; '
           f'app/data is {size:.1f} MB')
