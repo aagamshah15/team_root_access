@@ -26,6 +26,7 @@ economics:
   cost_rate_days: 7
   earliest_sellable_share: 0.95   # PROPOSED: "earliest sellable day" = this share of pots sellable
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
+  optimal_zone_share: 0.90        # D16: optimal zone = profit within 10 % of the best day
   area_m2: 96.0                   # room area for euro totals (paper §2.2: 96 m2 compartments)
 confidence:                  # PROPOSED thresholds; level = worst of the three parts
   day_range_high_max: 4      # best-day range (days) at most this -> high
