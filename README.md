@@ -4,20 +4,23 @@
 
 Team Root Access built this decision tool for the **2026 Precision & Digital Agriculture Hackathon**, Track 1, Challenge 2. The demo replays six greenhouse compartments from Wageningen’s 2024 Autonomous Greenhouse Challenge. A grower can compare harvest dates, inspect the weighed pots and camera images behind a forecast, and plan a shipment against a buyer’s deadline.
 
-![MuGrow harvest outlook on November 5. The profit curve peaks on November 7 while the red share of fruit continues to rise.](docs/images/mugrow-harvest.png)
+## Why did the app recommend waiting two days?
 
-## One room, one decision
+**MuGrow was one of the teams in the 2024 greenhouse trial.** It grew dwarf tomatoes in its own greenhouse room and sold each plant as a whole pot. On November 5, the team weighed the fruit from six sample pots. About 55 out of every 100 grams of fruit were red. Under the trial rules, a pot could be sold once at least one-third of its fruit weight was red. Some pots ripened sooner than others.
 
-On **November 5**, the MuGrow sample put the room at about **55% red fruit by weight**. The model recommended harvesting on **November 7**, with November 8 still within 10% of peak forecast profit. Moving the date slider shows why. By November 11 the fruit is redder, but the model already expects every pot to meet the sale threshold on November 7.
+Using the information available on November 5, the app compared what MuGrow could earn by harvesting the whole room that day or waiting. Each row below is a forecast made on November 5. The last column shows profit after growing costs, averaged over all the days the crop occupied one square metre of greenhouse space.
 
-| Candidate day | Forecast red fruit by weight | Estimated saleable pots | Forecast net profit per m² per growing day |
-| --- | ---: | ---: | ---: |
-| Nov 5 | 55% | 95% | €0.103 |
-| **Nov 7** | **64%** | **100%** | **€0.131** |
-| Nov 8 | 68% | 100% | €0.124 |
-| Nov 11 | 79% | 100% | €0.103 |
+| If MuGrow harvested… | Pots expected to qualify for sale, per 100 pots | Average profit per m² per day of growing |
+| --- | ---: | ---: |
+| November 5 · that day | 95 | 10.3 euro cents |
+| **November 7 · two days later** | **100** | **13.1 euro cents** |
+| November 11 · six days later | 100 | 10.3 euro cents |
 
-The **near-peak window** answers a scheduling question under the central forecast. Ripening uncertainty is wider. Under the model’s early and late ripening scenarios, MuGrow’s best day ranges from November 5 to 13. A fresh weighing helps a grower decide whether to act on the central estimate. [Published daily recommendations](data/published/days.json) · [Daily forecast values](data/published/forecast.json)
+**The app recommended November 7.** Waiting two days gave the slower pots time to qualify for sale. By November 11 the tomatoes would be redder, but the model expected the extra sales revenue to fall short of the cost of keeping the room growing. MuGrow actually harvested on November 11. The November 7 profit is therefore an estimate.
+
+![MuGrow’s November 5 forecast. The profit chart on the left peaks on November 7 while the ripeness chart on the right keeps rising.](docs/images/mugrow-harvest.png)
+
+The app also highlights **November 8** as a good option if the crew needs another day: its forecast profit was 12.4 cents, close to the 13.1-cent peak. The exact timing depends on how quickly the fruit ripens. In the model’s faster and slower ripening scenarios, the best date ranged from November 5 to 13. [Pot measurements](data/inputs/plants.csv) · [Harvest dates](data/published/rooms.json) · [Forecast values](data/published/forecast.json)
 
 ## How the model picks a harvest day
 
