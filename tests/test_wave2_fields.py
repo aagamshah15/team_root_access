@@ -105,9 +105,9 @@ def test_look_day_hand_worked():
 def test_published_cards_have_d16_fields():
     """On the real build every card has the zone around its best day and a look day consistent with its forecast."""
     import json
-    days = json.loads((common.REPO / 'app' / 'data' / 'days.json').read_text())['rows']
+    days = json.loads((common.REPO / 'data' / 'published' / 'days.json').read_text())['rows']
     if 'optimal_from' not in days[0]:
-        pytest.skip('app/data not rebuilt with D16 fields yet')
+        pytest.skip('data/published not rebuilt with D16 fields yet')
     for r in days:
         if r['profit_best_m2_day'] <= 0:
             assert r['optimal_from'] is None and r['optimal_to'] is None
@@ -145,10 +145,10 @@ def test_plant_spread_pooled_on_other_rooms_full_season():
 def test_plant_spread_real_ideas_any_day():
     """Real data: ideas uses the other five rooms' 5 Nov sds 7.80, 11.55, 12.97, 9.34, 10.83 ->
     mean variance (60.84 + 133.40 + 168.22 + 87.24 + 117.29) / 5 = 113.40 -> 10.65 points, on every today."""
-    days = json.loads((common.REPO / 'app' / 'data' / 'days.json').read_text())['rows']
+    days = json.loads((common.REPO / 'data' / 'published' / 'days.json').read_text())['rows']
     r = [x for x in days if x['room'] == 'ideas']
     if not r or 'pot_spread_sd' not in r[0]:
-        pytest.skip('app/data not rebuilt with D19 yet')
+        pytest.skip('data/published not rebuilt with D19 yet')
     assert all(x['pot_spread_sd'] == pytest.approx(10.65, abs=0.01) for x in r)
 
 

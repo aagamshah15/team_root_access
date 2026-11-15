@@ -63,11 +63,11 @@ def test_expand_gives_contract_rows_with_filled_steps():
 
 def test_published_explain_matches_cards():
     """Real build: every room-day expands cleanly, and the numbers agree with days.json (no new maths)."""
-    p = REPO / 'app' / 'data' / 'explain.json'
+    p = REPO / 'data' / 'published' / 'explain.json'
     if not p.exists():
-        pytest.skip('app/data/explain.json not built yet')
+        pytest.skip('data/published/explain.json not built yet')
     ex = json.loads(p.read_text())
-    cards = {(r['room'], r['today']): r for r in json.loads((REPO / 'app' / 'data' / 'days.json').read_text())['rows']}
+    cards = {(r['room'], r['today']): r for r in json.loads((REPO / 'data' / 'published' / 'days.json').read_text())['rows']}
     assert len(ex['rows']) == len(cards)
     for row in ex['rows']:
         card = cards[(row['room'], row['today'])]
