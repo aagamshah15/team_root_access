@@ -17,13 +17,13 @@ On **November 5**, the MuGrow sample put the room at about **55% red fruit by we
 | Nov 8 | 68% | 100% | €0.124 |
 | Nov 11 | 79% | 100% | €0.103 |
 
-The **near-peak window** answers a scheduling question under the central forecast. Ripening uncertainty is wider. Under the model’s early and late ripening scenarios, MuGrow’s best day ranges from November 5 to 13. A fresh weighing helps a grower decide whether to act on the central estimate. [Published daily recommendations](dwarf-tomato-harvest-forecast/app/data/days.json) · [Daily forecast values](dwarf-tomato-harvest-forecast/app/data/forecast.json)
+The **near-peak window** answers a scheduling question under the central forecast. Ripening uncertainty is wider. Under the model’s early and late ripening scenarios, MuGrow’s best day ranges from November 5 to 13. A fresh weighing helps a grower decide whether to act on the central estimate. [Published daily recommendations](data/published/days.json) · [Daily forecast values](data/published/forecast.json)
 
 ## How the model picks a harvest day
 
-1. **Estimate how fast the fruit is ripening.** The model accumulates warmth above 10 °C and fits an S-shaped ripening curve using the other rooms. Three consecutive noon images showing red fruit help locate the start of ripening. When a weighed sample is available, the model moves its estimate toward the measured red share. It projects the next 21 days using the room’s warmth rate over the past week. [Ripening model](dwarf-tomato-harvest-forecast/harvest/forecast.py)
-2. **Estimate what each pot can earn.** Pots in the same room ripen at different rates. The model represents that spread with 40 representative pots. A pot qualifies for sale when at least one-third of its fruit weight is red. The trial’s price curve assigns revenue by grams of red fruit, with no additional payment beyond 150 g per pot. [Scoring assumptions](dwarf-tomato-harvest-forecast/config/crop.yaml)
-3. **Compare the return for each candidate day.** For each square metre, the model multiplies expected revenue per pot by plant density, subtracts plant and accumulated growing costs, then divides by days grown. It selects the highest return among dates with at least 95% saleable pots. If no date qualifies, it reports the best return available and leaves the first saleable date unset. For a positive peak, the near-peak window includes adjacent days earning at least 90% of that return. [Profit calculation and date selection](dwarf-tomato-harvest-forecast/harvest/economics.py)
+1. **Estimate how fast the fruit is ripening.** The model accumulates warmth above 10 °C and fits an S-shaped ripening curve using the other rooms. Three consecutive noon images showing red fruit help locate the start of ripening. When a weighed sample is available, the model moves its estimate toward the measured red share. It projects the next 21 days using the room’s warmth rate over the past week. [Ripening model](harvest/forecast.py)
+2. **Estimate what each pot can earn.** Pots in the same room ripen at different rates. The model represents that spread with 40 representative pots. A pot qualifies for sale when at least one-third of its fruit weight is red. The trial’s price curve assigns revenue by grams of red fruit, with no additional payment beyond 150 g per pot. [Scoring assumptions](config/crop.yaml)
+3. **Compare the return for each candidate day.** For each square metre, the model multiplies expected revenue per pot by plant density, subtracts plant and accumulated growing costs, then divides by days grown. It selects the highest return among dates with at least 95% saleable pots. If no date qualifies, it reports the best return available and leaves the first saleable date unset. For a positive peak, the near-peak window includes adjacent days earning at least 90% of that return. [Profit calculation and date selection](harvest/economics.py)
 
 ## What changes when there is an order?
 
@@ -42,14 +42,14 @@ The team replayed **November 5, 2024**, the last sample date before any room was
 | Date the room reached its harvest ripeness | **1.67 days** | 3.00 days | 4.83 days |
 | Red fruit by weight on the actual harvest date | **6.24 percentage points** | 10.11 points | 7.01 points |
 
-The date baseline uses the other rooms’ average days from planting to harvest. The ripeness baseline uses their average final red share. In a separate comparison, the dashboard’s **economic recommendation averaged 4.17 days earlier** than the growers’ actual picks. The trial records one harvest per room, so profit on alternative dates remains a model estimate. All six rooms came from one site and season. [Backtest implementation](dwarf-tomato-harvest-forecast/harvest/backtest.py) · [Per-room results](dwarf-tomato-harvest-forecast/app/data/backtest.json) · [Evaluation metrics](dwarf-tomato-harvest-forecast/presentation-metrics/metrics.csv)
+The date baseline uses the other rooms’ average days from planting to harvest. The ripeness baseline uses their average final red share. In a separate comparison, the dashboard’s **economic recommendation averaged 4.17 days earlier** than the growers’ actual picks. The trial records one harvest per room, so profit on alternative dates remains a model estimate. All six rooms came from one site and season. [Backtest implementation](harvest/backtest.py) · [Per-room results](data/published/backtest.json) · [Evaluation metrics](docs/evaluation.csv)
 
 ## Run the demo
 
 The React app includes the trial forecasts and selected canopy photos. From a clone of this repository, use Node.js and npm (tested with Node 24).
 
 ```sh
-cd dwarf-tomato-harvest-forecast/web
+cd web
 npm ci
 npm run dev
 ```
@@ -59,7 +59,6 @@ Open the local URL printed by Vite. Start in **Harvest** with **MuGrow**, move *
 To reproduce the timing evaluation, start at the repository root with Python 3.14 and Make available.
 
 ```sh
-cd dwarf-tomato-harvest-forecast
 make setup
 .venv/bin/python -m harvest.backtest
 make test
@@ -69,10 +68,10 @@ make test
 
 | Location | Contents |
 | --- | --- |
-| [Grower interface](dwarf-tomato-harvest-forecast/web/src/grower) | Harvest outlook, shipment planner and custom-room entry |
-| [Forecast pipeline](dwarf-tomato-harvest-forecast/harvest) | Ripening, economics, uncertainty, shipment scenarios and data publication |
-| [Published demo data](dwarf-tomato-harvest-forecast/app/data) | Room forecasts, evidence photos and backtest records consumed by the app |
-| [HarvestWindow operations prototype](hw-branch/harvestwindow) | Greenhouse operations explorer and order-planning work |
-| [Streamlit analysis](app.py) | Earlier analysis dashboard alongside the root-level feature and audit scripts |
+| [Grower interface](web/src/grower) | Harvest outlook, shipment planner and custom-room entry |
+| [Forecast pipeline](harvest) | Ripening, economics, uncertainty, shipment scenarios and data publication |
+| [Published demo data](data/published) | Room forecasts, evidence photos and backtest records consumed by the app |
+| [Trial inputs](data/inputs) | Five CSVs containing daily climate and costs, plant weighings, room ripeness, camera features, and outdoor weather |
+| [File guide](docs/file-guide.md) | Where to follow a harvest recommendation from the raw measurements to the screen |
 
-**Data credit.** Stef Maree, Pinglin Zhang, Bart van Marrewijk, Feije de Zwart, Monique Bijlaard and Silke Hemming published the trial data under CC BY 4.0. This repository includes the time series, derived tables and selected canopy photos. The full camera collection is available from the dataset publisher. [4TU.ResearchData dataset](https://doi.org/10.4121/fa102772-32db-4b30-bace-12f2016722ce)
+**Data credit.** Stef Maree, Pinglin Zhang, Bart van Marrewijk, Feije de Zwart, Monique Bijlaard and Silke Hemming published the trial data under CC BY 4.0. This repository includes derived tables and selected canopy photos. The raw time series and full camera collection are available from the dataset publisher. [4TU.ResearchData dataset](https://doi.org/10.4121/fa102772-32db-4b30-bace-12f2016722ce)
