@@ -1,9 +1,0 @@
-team,sensor,issue,share,detail
-Tomatonuts,Drain pH,reads ~0 all season,1.0,stuck around 0.05: disconnected or not wired
-Tomatonuts,Drain EC,reads ~0 all season,1.0,stuck around 0.07: disconnected or not wired
-Reference,Drain pH,reads ~0 all season,1.0,stuck around 0.05: disconnected or not wired
-Reference,Drain EC,reads ~0 all season,1.0,stuck around 0.03: disconnected or not wired
-IDEAS,Drain pH,impossible values,0.9993601417532116,"median of bad readings 15.7, valid range 3–9.5"
-IDEAS,Drain EC,reads ~0 all season,1.0,stuck around 0.09: disconnected or not wired
-Trigger,Drain pH,impossible values,0.999432537430704,"median of bad readings 15.2, valid range 3–9.5"
-Trigger,Drain EC,reads ~0 all season,1.0,stuck around 0.07: disconnected or not wired
