@@ -1,9 +1,4 @@
-"""Check published app files against contracts/app-data.md.
-
-Owner: integrator. Run: python contracts/check.py [folder]
-Checks app/data/ if it has files, else app/mock/; skips quietly if neither exists yet.
-Exit code 1 on any mismatch.
-"""
+"""Validate the schema of the published model outputs."""
 import json
 import math
 import sys
@@ -55,8 +50,8 @@ def check_folder(folder: Path) -> list[str]:
         for k in ('source', 'built_at', 'as_of'):
             if k not in meta:
                 errors.append(f'{name}.json meta lacks {k}')
-        if folder.name == 'data' and meta.get('mock'):
-            errors.append(f'{name}.json in app/data is mock data')
+        if meta.get('mock'):
+            errors.append(f'{name}.json in published data is mock data')
         if not isinstance(rows, list) or not rows:
             errors.append(f'{name}.json has no rows')
             continue
@@ -77,18 +72,11 @@ def check_folder(folder: Path) -> list[str]:
 
 
 def main():
-    if len(sys.argv) > 1:
-        folder = Path(sys.argv[1]).resolve()
-    else:
-        data, mock = REPO / 'app' / 'data', REPO / 'app' / 'mock'
-        folder = data if any(data.glob('*.json')) else mock
-    if not any(folder.glob('*.json')):
-        print(f'contract check: nothing to check yet ({folder.relative_to(REPO)})')
-        return 0
+    folder = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / 'data' / 'published'
     errors = check_folder(folder)
     for e in errors:
         print('CONTRACT:', e)
-    print(f'contract check on {folder.relative_to(REPO)}: {"FAILED" if errors else "ok"}')
+    print(f'contract check on {folder}: {"FAILED" if errors else "ok"}')
     return 1 if errors else 0
 
 

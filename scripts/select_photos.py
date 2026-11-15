@@ -1,6 +1,6 @@
-"""Copy the noon photos the app shows into app/data/photos/, small enough to publish.
+"""Copy the noon photos the app shows into data/published/photos/, small enough to publish.
 
-Owner: L03. Run: python scripts/select_photos.py  (reads $HARVEST_INPUTS/thumbs/, default out/thumbs/)
+Run python scripts/select_photos.py [thumbnail-directory] after extracting the raw camera images.
 
 For each room: noon photos from 15 Oct 2024 to the day before harvest (the harvest-day photo shows empty
 tables, so it is dropped), resized to 320 px wide at JPEG quality 70, saved as `<room>_<date>.jpg`.
@@ -15,7 +15,7 @@ from pathlib import Path
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from harvest.common import ROOMS, actual_harvest, inputs_folder, load_inputs  # noqa: E402
+from harvest.common import ROOMS, actual_harvest, REPO, load_inputs  # noqa: E402
 from harvest.evidence import PHOTOS_DIR, photo_dates, photo_name  # noqa: E402
 
 WIDTH, QUALITY = 320, 70
@@ -42,7 +42,9 @@ def thin_early(paths: list[Path]) -> list[Path]:
 
 def main() -> int:
     inputs = load_inputs()
-    thumbs = inputs_folder() / 'thumbs'
+    thumbs = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / 'out' / 'thumbs'
+    if not any(thumbs.glob('*.jpg')):
+        raise SystemExit(f'No source thumbnails found in {thumbs}')
     PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
     for old in PHOTOS_DIR.glob('*.jpg'):
         old.unlink()

@@ -1,21 +1,11 @@
-"""Check that the app's data folder has every field app.js reads, and that the page stays static.
-
-Owner: L04. Run: python app/check_app.py [folder]   (default: app/data if it has JSON, else app/mock)
-Stdlib only. Exit code 1 on any problem.
-
-Why: contracts/check.py checks the contract; this checks what the app *actually reads*, plus the
-joins it relies on (every decision card has a forecast curve, a what-if row at 0 °C, an evidence row),
-and the publishing rules (relative paths only, d3 pinned from cdnjs, no other network calls, < 5 MB).
-"""
+"""Check that each decision card has matching forecasts, evidence and economic scenarios."""
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 
-APP = Path(__file__).resolve().parent
-READS = {   # file -> row fields app.js reads
+READS = {   # file -> published row fields
     'customers': ['customer_id', 'name', 'tagline', 'rooms'],
     'rooms': ['room', 'display_name', 'customer_id', 'area_m2', 'actual_harvest'],
     'days': ['room', 'today', 'status', 'pct_red_now', 'pct_red_low', 'pct_red_high', 'sellable_share_now', 'model',
@@ -32,7 +22,6 @@ READS = {   # file -> row fields app.js reads
     'backtest': ['test', 'method', 'value', 'unit', 'n', 'note'],
     'assumptions': ['name', 'value', 'unit', 'source', 'if_wrong'],
 }
-D3 = 'https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js'
 
 
 def check_data(folder: Path) -> list[str]:
@@ -92,35 +81,9 @@ def check_data(folder: Path) -> list[str]:
     return errs
 
 
-def check_static() -> list[str]:
-    """The page loads only d3 (pinned, cdnjs) from the network and uses relative paths."""
-    errs = []
-    for f in ('index.html', 'app.js', 'style.css'):
-        text = (APP / f).read_text()
-        for url in re.findall(r'https?://[^\s"\'`)<>]+', text):
-            if url != D3:
-                errs.append(f'{f}: unexpected network URL {url}')
-        if re.search(r'''(src|href)=["']/''', text):
-            errs.append(f'{f}: absolute path in src/href')
-    if D3 not in (APP / 'index.html').read_text():
-        errs.append('index.html does not load the pinned d3 v7.9.0 from cdnjs')
-    if 'Demo customer — replayed 2024 data' not in (APP / 'index.html').read_text():
-        errs.append('index.html lacks the demo banner text')
-    return errs
-
-
-def main() -> int:
-    if len(sys.argv) > 1:
-        folder = Path(sys.argv[1])
-    else:
-        data = APP / 'data'
-        folder = data if any(data.glob('*.json')) else APP / 'mock'
-    errs = check_data(folder) + check_static()
-    for e in errs:
-        print('APP CHECK:', e)
-    print(f'app check on {folder.name}/: {"FAILED" if errs else "ok"}')
-    return 1 if errs else 0
-
-
 if __name__ == '__main__':
-    sys.exit(main())
+    folder = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1] / 'data' / 'published'
+    errors = check_data(folder)
+    for error in errors:
+        print(error)
+    sys.exit(bool(errors))

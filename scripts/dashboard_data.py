@@ -2,14 +2,14 @@
 
 Usage: python3 dashboard_data.py path/to/autonomous_greenhouse_challenge4_timeseries.zip
 Reads out/daily.csv, out/ripeness.csv, out/ripeness_plants.csv, out/image_features.csv, out/thumbs/
-Writes out/dash/{daily,weather,ripeness,plants,images}.csv
+Writes data/inputs/{daily,weather,ripeness,plants,images}.csv
 """
 import io, os, sys, zipfile
 import numpy as np
 import pandas as pd
 from PIL import Image
 
-OUT = 'out/dash'
+OUT = 'data/inputs'
 ROOT = 'autonomous_greenhouse_challenge4_timeseries/timeseries/'
 TEAMS = ['tomatonuts', 'mugrow', 'agrifusion', 'reference', 'ideas', 'trigger']
 
