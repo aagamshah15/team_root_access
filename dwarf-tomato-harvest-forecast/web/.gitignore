@@ -1,5 +1,0 @@
-node_modules/
-dist/
-# copied from ../app/data by scripts/sync-data.mjs; app/data is the source of truth
-public/data/
-*.tsbuildinfo

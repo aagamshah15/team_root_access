@@ -1,5 +1,5 @@
 /* lib/trip.ts must give the same pluck plan as harvest/shipping.py for every published room, day and preset
- * destination (shipping.json), exactly as tests/test_trip.cjs checks app/trip.js. */
+ * destination (shipping.json). */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -7,7 +7,7 @@ import { planTrip, transitDays } from './trip';
 import { addDays } from '../data/format';
 import type { DayCard, ForecastRow, ShippingMeta, ShippingRow } from '../data/types';
 
-const DATA = resolve(__dirname, '..', '..', '..', 'app', 'data');
+const DATA = resolve(__dirname, '..', '..', '..', 'data', 'published');
 const load = (f: string) => JSON.parse(readFileSync(resolve(DATA, `${f}.json`), 'utf8'));
 const ship = load('shipping') as { meta: ShippingMeta; rows: ShippingRow[] };
 const days = load('days') as { rows: DayCard[] };

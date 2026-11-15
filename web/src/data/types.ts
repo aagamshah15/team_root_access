@@ -1,6 +1,3 @@
-/* Types for the published files in app/data/ (contracts/app-data.md). Fields added in wave 2 (D16 zone and
- * look day, explain.json) are optional: the app shows "—" when a build does not have them yet. */
-
 export type ISODate = string;
 
 export interface Meta {
@@ -11,17 +8,6 @@ export interface Meta {
   [k: string]: unknown;
 }
 export interface Doc<R, M extends Meta = Meta> { meta: M; rows: R[] }
-
-export interface Customer { customer_id: string; name: string; tagline: string; rooms: string[] }
-
-export interface Room {
-  room: string;
-  display_name: string;
-  customer_id: string;
-  area_m2: number | null;
-  planted?: ISODate | null;
-  actual_harvest: ISODate | null;
-}
 
 export type Status = 'harvest_now' | 'plan_harvest' | 'keep_growing' | 'check_crop';
 export type Level = 'high' | 'medium' | 'low';
@@ -78,24 +64,6 @@ export interface ForecastRow {
   cost_to_date_m2: number;
 }
 
-export interface WhatIfRow {
-  room: string;
-  today: ISODate;
-  delta_c: number;
-  best_day: ISODate | null;
-  days_change: number;
-  profit_best_m2_day: number | null;
-  profit_change_m2_day: number | null;
-  extra_energy_cost_m2_day: number | null;
-  note: string;
-}
-export interface HeatingFit { eur_m2_day_per_c: number; r2: number | null; n: number; note?: string }
-export interface WhatIfMeta extends Meta {
-  note?: string;
-  heating_fit?: HeatingFit;
-  heating_fit_by_today?: Record<ISODate, HeatingFit>;
-}
-
 export interface EvidenceRow {
   room: string;
   date: ISODate;
@@ -110,20 +78,6 @@ export interface EvidenceRow {
   last_sample_pct_red: number | null;
   last_sample_fw_g: number | null;
 }
-
-export interface AlertRow {
-  room: string;
-  date: ISODate;
-  kind: 'behind_schedule' | 'ahead_of_schedule' | 'sensor_check' | 'room_drift' | string;
-  severity: 'info' | 'warning';
-  title: string;
-  message: string;
-  numbers: Record<string, unknown>;
-}
-
-export interface BacktestRow { test: string; method: string; value: number; unit: string; n: number; note: string }
-export interface BacktestPerRoom { room: string; test?: string; method: string; predicted: string | number; actual: string | number; error: number }
-export interface BacktestMeta extends Meta { per_room?: BacktestPerRoom[] }
 
 export interface Destination { id: string; name: string; distance_km: number; transit_days: number }
 export interface Truck {
@@ -160,33 +114,4 @@ export interface ShippingRow {
   profit_m2_day: number | null;
   best_profit_day: ISODate | null;
   profit_best_m2_day: number | null;
-}
-
-export type KpiId = 'best_day' | 'pots_ready' | 'profit_best' | 'confidence' | 'look_day' | 'ship_day';
-export interface ExplainInput { name: string; value: string | number | null; unit?: string | null; source?: string | null }
-/** explain.json (wave 2, L09): drives the "How is this worked out?" panel. */
-export interface ExplainRow {
-  room: string;
-  today: ISODate;
-  kpi: KpiId;
-  meaning: string;
-  steps: string[];
-  inputs: ExplainInput[];
-  caveats: string[];
-}
-
-export interface Assumption { name: string; value: string | number | null; unit: string | null; source: string; if_wrong: string }
-
-export interface AppData {
-  customers: Doc<Customer>;
-  rooms: Doc<Room>;
-  days: Doc<DayCard>;
-  forecast: Doc<ForecastRow>;
-  whatif: Doc<WhatIfRow, WhatIfMeta>;
-  evidence: Doc<EvidenceRow>;
-  alerts: Doc<AlertRow>;
-  backtest: Doc<BacktestRow, BacktestMeta>;
-  assumptions: Doc<Assumption>;
-  shipping: Doc<ShippingRow, ShippingMeta>;
-  explain: Doc<ExplainRow>;
 }
