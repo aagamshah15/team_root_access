@@ -1,4 +1,4 @@
-"""Evidence trail: what we saw in each room on each day (SPEC §7, contracts/app-data.md `evidence.json`).
+"""Evidence trail: what we saw in each room on each day (SPEC §7, docs/app-data.md `evidence.json`).
 
 Owner: L03. For every room and day from planting to the day before harvest we publish the noon photo
 (if one was selected for the app), its red-fruit index, whether the grow lamps were on at noon, the
@@ -15,13 +15,13 @@ import pandas as pd
 
 from .common import REPO, planted, ROOMS, Inputs, actual_harvest
 
-PHOTOS_DIR = REPO / 'app' / 'data' / 'photos'
-PHOTO_URL_PREFIX = 'data/photos/'      # photo paths are relative to app/index.html
+PHOTOS_DIR = REPO / 'data' / 'published' / 'photos'
+PHOTO_URL_PREFIX = 'data/photos/'      # photo paths are relative to web/index.html
 PHOTO_FIRST = date(2024, 10, 15)       # first day the app shows photos for (lane brief L03)
 
 
 def photo_name(room: str, day: date) -> str:
-    """File name of a selected photo in app/data/photos/: `<room>_<YYYY-MM-DD>.jpg`."""
+    """File name of a selected photo in data/published/photos/: `<room>_<YYYY-MM-DD>.jpg`."""
     return f'{room}_{day.isoformat()}.jpg'
 
 
@@ -100,6 +100,6 @@ def room_evidence(inputs: Inputs, room: str, photos_dir: Path = PHOTOS_DIR) -> l
 
 
 def evidence_rows(inputs: Inputs, photos_dir: Path = PHOTOS_DIR) -> list[dict]:
-    """evidence.json rows for every room (contracts/app-data.md §1)."""
+    """evidence.json rows for every room (docs/app-data.md §1)."""
     rooms = [r for r in ROOMS if r in set(inputs.daily.room)]
     return [row for room in rooms for row in room_evidence(inputs, room, photos_dir)]

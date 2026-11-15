@@ -1,10 +1,4 @@
-"""Shared loading and date helpers for the Tomato Harvest POC pipeline.
-
-Owner: integrator (wave 2: L09 adds the per-room planting date, D17). Lanes import from here.
-
-Inputs are the derived tables `main`'s scripts write to `out/` (all built from the organizer dataset).
-Set HARVEST_INPUTS to point at another folder with the same files (tests use tests/fixtures/inputs).
-"""
+"""Load trial measurements, crop settings and room calendars for the forecast."""
 from __future__ import annotations
 
 import os
@@ -18,7 +12,7 @@ import yaml
 REPO = Path(__file__).resolve().parent.parent
 ROOMS = ['agrifusion', 'ideas', 'mugrow', 'reference', 'tomatonuts', 'trigger']
 PLANTED = date(2024, 9, 3)          # default planting date; each room's own date comes from planted(room) (D17)
-FIRST_TODAY = date(2024, 10, 20)   # earliest "today" the app offers (contracts/app-data.md §1)
+FIRST_TODAY = date(2024, 10, 20)   # earliest "today" the app offers (docs/app-data.md §1)
 
 
 @dataclass
@@ -42,17 +36,19 @@ def _read(folder: Path, name: str) -> pd.DataFrame:
 
 
 def inputs_folder(path: str | os.PathLike | None = None) -> Path:
-    """Folder holding dash/*.csv: argument, else $HARVEST_INPUTS, else <repo>/out."""
-    return Path(path or os.environ.get('HARVEST_INPUTS') or REPO / 'out')
+    """Directory containing the five model input tables."""
+    return Path(path or os.environ.get('HARVEST_INPUTS') or REPO / 'data' / 'inputs')
 
 
 def load_inputs(path: str | os.PathLike | None = None) -> Inputs:
-    """Load the five input tables from `<folder>/dash/`."""
-    d = inputs_folder(path) / 'dash'
+    """Load the five input tables from the input directory."""
+    d = inputs_folder(path)
+    if (d / 'dash').is_dir():  # Also accept the original input directory layout.
+        d = d / 'dash'
     daily = _read(d, 'daily.csv').sort_values(['room', 'date']).reset_index(drop=True)
     daily['density'] = daily.groupby('room')['density'].transform(lambda s: s.ffill().fillna(56.0))
     return Inputs(daily=daily, ripeness=_read(d, 'ripeness.csv'), plants=_read(d, 'plants.csv'),
-                  images=_read(d, 'images.csv'), weather=_read(d, 'weather.csv'), folder=d.parent)
+                  images=_read(d, 'images.csv'), weather=_read(d, 'weather.csv'), folder=d)
 
 
 def load_settings(path: str | os.PathLike | None = None) -> dict:

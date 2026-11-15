@@ -1,4 +1,4 @@
-"""Plain-English alerts: something in a room looks off (SPEC §7, contracts/app-data.md `alerts.json`).
+"""Plain-English alerts: something in a room looks off (SPEC §7, docs/app-data.md `alerts.json`).
 
 Owner: L03. Four kinds:
 - behind_schedule / ahead_of_schedule: a crop sample, or the noon camera, disagrees with the forecast band
@@ -291,7 +291,7 @@ def room_days(inputs: Inputs, room: str) -> list[date]:
 
 
 def alerts(inputs: Inputs, settings: dict | None = None, forecast_for: ForecastFn | None = None) -> list[dict]:
-    """alerts.json rows for every room and date (contracts/app-data.md §1), sorted by date then room.
+    """alerts.json rows for every room and date (docs/app-data.md §1), sorted by date then room.
 
     Schedule alerts need a forecast; without L01's `forecast` (and none passed in) they are skipped.
     """

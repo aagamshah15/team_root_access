@@ -3,7 +3,7 @@
 No new maths: every value here is one the pipeline already computed for the same room and "today" (the
 decision card in days.json, the profit curve, the fit, the default-destination shipping plan).
 
-Size (CLAUDE.md: app/data under 5 MB). Writing the full text on every room x today x KPI row would add
+Size (CLAUDE.md: data/published under 5 MB). Writing the full text on every room x today x KPI row would add
 about 1.5 MB, so explain.json is stored compactly:
   meta.kpis[kpi] = {title, meaning, steps, inputs, caveats}  -- the text, written once per KPI.
       `steps` are templates with {key} placeholders; `inputs` are {name, key, unit, kind, source}.
@@ -210,7 +210,7 @@ def lookup(key: str, values: dict, card: dict, consts: dict):
 
 
 def expand(meta: dict, row: dict, card: dict) -> list[dict]:
-    """explain.json row + its days.json card -> the six contract rows (contracts/app-data.md, explain.json)."""
+    """explain.json row + its days.json card -> the six contract rows (docs/app-data.md, explain.json)."""
     consts = dict(meta['constants'])
     consts['model_words'] = MODEL_WORDS.get(card.get('model'), card.get('model'))
     consts['pluck_reason_words'] = REASON_WORDS.get(row['values'].get('pluck_reason'), 'there is no plan yet')

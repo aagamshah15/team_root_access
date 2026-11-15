@@ -1,4 +1,4 @@
-"""Write app/data/*.json from the lane modules (contracts/app-data.md).
+"""Write data/published/*.json from the lane modules (docs/app-data.md).
 
 Owner: integrator. Run: python -m harvest.publish   (or `make build`, which also selects photos and checks the output)
 
@@ -29,10 +29,10 @@ from harvest.logistics import transit_days
 from harvest.economics import Z
 from harvest.whatif import NOTE as WHATIF_NOTE, heating_cost_per_degree, whatif
 
-OUT = REPO / 'app' / 'data'
+OUT = REPO / 'data' / 'published'
 DELTAS = [-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
 SOURCE = ('4th Autonomous Greenhouse Challenge: Dwarf Tomato Timeseries and Images (Maree et al., 4TU.ResearchData, '
-          'CC BY 4.0), via the derived tables in out/dash/. Scoring rules: Maree et al. 2025, Sensors 25:4321.')
+          'CC BY 4.0), via the derived tables in data/inputs/. Scoring rules: Maree et al. 2025, Sensors 25:4321.')
 
 
 def _iso(v):
@@ -65,7 +65,7 @@ def status_for(today: date, win: dict, sellable_now: float, conf: dict, settings
 
 def compact_ship(room: str, today: date, r: dict) -> dict | None:
     """shipping.json row (contract §1): shelf dates as days after arrival, distance and days on the road in
-    meta.destinations, and no row when the pluck day is beyond the forecast (keeps app/data under 5 MB)."""
+    meta.destinations, and no row when the pluck day is beyond the forecast (keeps data/published under 5 MB)."""
     if r['pluck_day'] is None:
         return None
     after = lambda d: (d - r['arrival_day']).days
@@ -106,13 +106,13 @@ def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict
     card['look_day'] = look_day(fc, float(settings['logistics']['best_band_pct_red'][0]))                 # D16
     weight = weight_complete_day(inputs, room, today, p['gdd_today'], p['gdd_rate'], settings)
     card['weight_complete_day'] = weight['day']   # shipping extension: fruit stops gaining weight
-    card['k_x1000'] = p['k'] * 1000               # curve steepness per 1000 dd (keeps precision after 4-dp rounding) for app/trip.js
+    card['k_x1000'] = p['k'] * 1000               # curve steepness per 1000 dd (keeps precision after 4-dp rounding) for web/src/lib/trip.ts
     plans = {dest['id']: ship_plan(inputs, room, today, settings, p, fc, dest, weight)
              for dest in settings['logistics']['destinations']}
     ships = [compact_ship(room, today, plan) for plan in plans.values()]
     ships = [r for r in ships if r is not None]
     spread = plant_spread(inputs, room, today, settings)   # D19: the same spread profit_by_day used
-    card['pot_spread_sd'] = spread['sd']   # D19: differs by room (other five rooms' weighings); app/trip.js reads it
+    card['pot_spread_sd'] = spread['sd']   # D19: differs by room (other five rooms' weighings); web/src/lib/trip.ts reads it
     explain = dict(room=room, today=today, values=room_day_values(
         card, curve, p, plans[settings['logistics']['default_destination']], settings, spread))
     rows = [dict(room=room, today=today, date=r.date, pct_red=r.pct_red, pct_red_low=r.pct_red_low,
@@ -148,8 +148,8 @@ def assumptions_rows(settings: dict) -> list[dict]:
                  source=a['source'], if_wrong=a['if_wrong']) for a in settings.get('assumptions', [])]
 
 
-# Decimal places per published field: enough for what the app shows and for app/trip.js to reproduce the
-# shipping plans, no more (pct_red stays at 4 places: app/trip.js recomputes ship-by days from it) (keeps app/data under the 5 MB budget in CLAUDE.md). Fields not listed keep 4.
+# Decimal places per published field: enough for what the app shows and for web/src/lib/trip.ts to reproduce the
+# shipping plans, no more (pct_red stays at 4 places: web/src/lib/trip.ts recomputes ship-by days from it) (keeps data/published under the 5 MB budget in CLAUDE.md). Fields not listed keep 4.
 DECIMALS = {'pct_red_low': 1, 'pct_red_high': 1, 'pct_red_now': 1, 'pct_at_pluck': 1, 'pct_on_arrival': 1,
             'sellable_share': 3, 'sellable_share_now': 3, 'profit_m2_day': 3, 'profit_low': 3, 'profit_high': 3,
             'cost_to_date_m2': 2, 'profit_best_m2_day': 3, 'profit_today_m2_day': 3, 'profit_change_m2_day': 3,
@@ -210,7 +210,7 @@ def main() -> int:
     write('explain', explain_rows, as_of, **explain_meta(settings))   # compact form: see harvest/explain.py
     size = sum(p.stat().st_size for p in OUT.rglob('*') if p.is_file()) / 1e6
     print(f'publish: {len(cards)} decision cards, {len(fc_rows)} forecast rows, {len(wi_rows)} what-if rows; '
-          f'app/data is {size:.1f} MB')
+          f'data/published is {size:.1f} MB')
     return 0
 
 

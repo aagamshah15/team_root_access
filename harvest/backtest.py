@@ -104,7 +104,7 @@ def timing_test(inputs: Inputs, settings: dict | None = None) -> tuple[pd.DataFr
 
 
 def main():
-    """Print the timing table on the inputs in $HARVEST_INPUTS (default: out/)."""
+    """Print the timing table on the inputs in $HARVEST_INPUTS (default: data/inputs/)."""
     summary, per = timing_test(load_inputs())
     pd.set_option('display.width', 200)
     pd.set_option('display.max_colwidth', 120)
