@@ -1,0 +1,2643 @@
+{
+    "name": "Autonomous Greenhouse Challenge 4",
+    "start_date": "2024-09-03",
+    "end_date": "2024-11-22",
+    "timezone": "Europe/Amsterdam",
+    "components": {
+        "agrifusion": {
+            "name": "Agrifusion",
+            "type": "cultivation",
+            "components": {
+                "compartment": {
+                    "name": "303",
+                    "type": "compartment",
+                    "datastreams": {
+                        "air_temperature": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "par": {
+                            "property_name": "PAR Light Intensity",
+                            "unit": "micromole / meter ** 2 / second",
+                            "type": "measurement",
+                            "description": "Amount of PAR light - technically it is the PPFD (Photosynthetic Photon Flux Density)"
+                        },
+                        "co2_concentration": {
+                            "property_name": "CO2 Concentration",
+                            "unit": "ppm",
+                            "type": "measurement",
+                            "description": "Measured CO2 concentration in the air"
+                        },
+                        "humidity_deficit": {
+                            "property_name": "Humidity Deficit",
+                            "unit": "gram / meter ** 3",
+                            "type": "measurement",
+                            "description": "Humidity deficit is the water mass missing for the air to reach saturation."
+                        },
+                        "window_position_lee_side": {
+                            "property_name": "Window Position: Lee Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "window_position_wind_side": {
+                            "property_name": "Window Position: Wind Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on side where the wind is coming from, where 0 means closed."
+                        },
+                        "co2_actuation_state": {
+                            "property_name": "CO2 Actuation State",
+                            "unit": "dimensionless",
+                            "type": "measurement",
+                            "description": "1 = on, 2 = out"
+                        },
+                        "co2_dosage_minutes_cumulative": {
+                            "property_name": "CO2 Dosage Minutes",
+                            "unit": "minute",
+                            "type": "measurement",
+                            "description": "Total minutes of CO2 dosed since reset."
+                        },
+                        "heating_temperature_vip": {
+                            "property_name": "Air Temperature: Heating ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the ViP, heating is activated. ViP = setpoint + influences"
+                        },
+                        "heating_temperature_setpoint": {
+                            "property_name": "Air Temperature: Heating Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the setpoint, heating is activated."
+                        },
+                        "ventilation_temperature_lee_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Lee Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_wind_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Wind Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_setpoint": {
+                            "property_name": "Air Temperature: Ventilation Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the setpoint, windows are opened."
+                        },
+                        "minimum_window_position_lee_side_vip": {
+                            "property_name": "Minimum Window Position: Lee Side ViP",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_window_position_lee_side_setpoint": {
+                            "property_name": "Minimum Window Position: Lee Side Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_pipe_temperature_vip": {
+                            "property_name": "Heating Pipe: Minimum Temperature ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "minimum_pipe_temperature_setpoint": {
+                            "property_name": "Heating Pipe: Minimum Temperature Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "lamps_activation_percentage": {
+                            "property_name": "Activation Percentage",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "lamps_activation_percentage_setpoint": {
+                            "property_name": "Activation Percentage: Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "co2_concentration_vip": {
+                            "property_name": "Air CO2 Concentration: ViP",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "co2_concentration_setpoint": {
+                            "property_name": "CO2 Concentration: Setpoint",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "humidity_deficit_vip": {
+                            "property_name": "Humidity Deficit: ViP",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        },
+                        "humidity_deficit_setpoint": {
+                            "property_name": "Humidity Deficit: Setpoint",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        },
+                        "mass.plant": {
+                            "property_name": "Mass",
+                            "unit": "kilogram",
+                            "type": "measurement"
+                        },
+                        "air_temperature.microclimate": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity.microclimate": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "vivent_biosignals": {
+                            "property_name": "Vivent Biosignals",
+                            "unit": "microvolt",
+                            "type": "measurement",
+                            "description": "Vivent Electrophysiology Sensor"
+                        }
+                    },
+                    "components": {
+                        "heating_lower_circuit": {
+                            "type": "heating",
+                            "name": "Lower Circuit",
+                            "datastreams": {
+                                "pipe_temperature": {
+                                    "property_name": "Pipe Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement",
+                                    "description": "Temperature of the water flowing through a pipes."
+                                }
+                            }
+                        },
+                        "screen_energy": {
+                            "type": "screen",
+                            "name": "Energy",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "screen_blackout": {
+                            "type": "screen",
+                            "name": "Blackout",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "water_supply": {
+                            "type": "water",
+                            "name": "Supply",
+                            "datastreams": {
+                                "water_flow_duration": {
+                                    "property_name": "Flow Duration",
+                                    "unit": "minute",
+                                    "type": "measurement",
+                                    "description": "The duration of water flow."
+                                },
+                                "water_supply_interval_vip": {
+                                    "property_name": "Water Supply Interval: ViP",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                },
+                                "water_supply_interval_setpoint": {
+                                    "property_name": "Water Supply Interval: Setpoint",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                }
+                            }
+                        },
+                        "water_drain": {
+                            "type": "water",
+                            "name": "Drain",
+                            "datastreams": {
+                                "water_volume": {
+                                    "property_name": "Volume",
+                                    "unit": "liter / meter ** 2",
+                                    "type": "measurement",
+                                    "description": "The volume of water measured."
+                                },
+                                "ec": {
+                                    "property_name": "EC",
+                                    "unit": "decisiemens / meter",
+                                    "type": "measurement",
+                                    "description": "Electrical conducitivity."
+                                },
+                                "ph": {
+                                    "property_name": "pH",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "pH value"
+                                }
+                            }
+                        },
+                        "substrate": {
+                            "type": "substrate",
+                            "name": "Substrate",
+                            "datastreams": {
+                                "relative_permittivity": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.1": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.1": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.1": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.2": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.2": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.2": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                }
+                            }
+                        }
+                    }
+                },
+                "dwarf_tomato": {
+                    "name": "Dwarf Tomato",
+                    "type": "crop",
+                    "datastreams": {
+                        "plant_density": {
+                            "property_name": "Plant Density",
+                            "unit": "plant / meter ** 2",
+                            "type": "parameter",
+                            "description": "Plant density"
+                        },
+                        "harvest_date": {
+                            "property_name": "Harvest Date",
+                            "unit": "count",
+                            "type": "parameter",
+                            "description": "Day number"
+                        },
+                        "pot_area": {
+                            "property_name": "Pot Area",
+                            "unit": "meter ** 2 / plant",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "economics": {
+                    "type": "economics",
+                    "datastreams": {
+                        "fixed_costs.per_m2": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "fixed_costs.per_pot": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_m2": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_pot": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_m2": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_pot": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_m2": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_pot": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "energy": {
+                    "type": "energy",
+                    "datastreams": {
+                        "energy_use.heating": {
+                            "property_name": "Energy Use",
+                            "unit": "megajoule",
+                            "type": "measurement",
+                            "description": "Energy consumption"
+                        },
+                        "electricity_use.lighting": {
+                            "property_name": "Electricity Use",
+                            "unit": "kilowatt_hour",
+                            "type": "measurement",
+                            "description": "Electricity consumption"
+                        },
+                        "co2_dosage": {
+                            "property_name": "CO2 Dosage",
+                            "unit": "kilogram / meter ** 2",
+                            "type": "measurement"
+                        }
+                    },
+                    "components": {}
+                }
+            }
+        },
+        "ideas": {
+            "name": "IDEAS",
+            "type": "cultivation",
+            "components": {
+                "compartment": {
+                    "name": "307",
+                    "type": "compartment",
+                    "datastreams": {
+                        "air_temperature": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "par": {
+                            "property_name": "PAR Light Intensity",
+                            "unit": "micromole / meter ** 2 / second",
+                            "type": "measurement",
+                            "description": "Amount of PAR light - technically it is the PPFD (Photosynthetic Photon Flux Density)"
+                        },
+                        "co2_concentration": {
+                            "property_name": "CO2 Concentration",
+                            "unit": "ppm",
+                            "type": "measurement",
+                            "description": "Measured CO2 concentration in the air"
+                        },
+                        "humidity_deficit": {
+                            "property_name": "Humidity Deficit",
+                            "unit": "gram / meter ** 3",
+                            "type": "measurement",
+                            "description": "Humidity deficit is the water mass missing for the air to reach saturation."
+                        },
+                        "window_position_lee_side": {
+                            "property_name": "Window Position: Lee Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "window_position_wind_side": {
+                            "property_name": "Window Position: Wind Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on side where the wind is coming from, where 0 means closed."
+                        },
+                        "co2_actuation_state": {
+                            "property_name": "CO2 Actuation State",
+                            "unit": "dimensionless",
+                            "type": "measurement",
+                            "description": "1 = on, 2 = out"
+                        },
+                        "co2_dosage_minutes_cumulative": {
+                            "property_name": "CO2 Dosage Minutes",
+                            "unit": "minute",
+                            "type": "measurement",
+                            "description": "Total minutes of CO2 dosed since reset."
+                        },
+                        "heating_temperature_vip": {
+                            "property_name": "Air Temperature: Heating ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the ViP, heating is activated. ViP = setpoint + influences"
+                        },
+                        "heating_temperature_setpoint": {
+                            "property_name": "Air Temperature: Heating Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the setpoint, heating is activated."
+                        },
+                        "ventilation_temperature_lee_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Lee Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_wind_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Wind Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_setpoint": {
+                            "property_name": "Air Temperature: Ventilation Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the setpoint, windows are opened."
+                        },
+                        "minimum_window_position_lee_side_vip": {
+                            "property_name": "Minimum Window Position: Lee Side ViP",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_window_position_lee_side_setpoint": {
+                            "property_name": "Minimum Window Position: Lee Side Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_pipe_temperature_vip": {
+                            "property_name": "Heating Pipe: Minimum Temperature ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "minimum_pipe_temperature_setpoint": {
+                            "property_name": "Heating Pipe: Minimum Temperature Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "lamps_activation_percentage": {
+                            "property_name": "Activation Percentage",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "lamps_activation_percentage_setpoint": {
+                            "property_name": "Activation Percentage: Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "co2_concentration_vip": {
+                            "property_name": "Air CO2 Concentration: ViP",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "co2_concentration_setpoint": {
+                            "property_name": "CO2 Concentration: Setpoint",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "humidity_deficit_vip": {
+                            "property_name": "Humidity Deficit: ViP",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        },
+                        "humidity_deficit_setpoint": {
+                            "property_name": "Humidity Deficit: Setpoint",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        }
+                    },
+                    "components": {
+                        "heating_lower_circuit": {
+                            "type": "heating",
+                            "name": "Lower Circuit",
+                            "datastreams": {
+                                "pipe_temperature": {
+                                    "property_name": "Pipe Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement",
+                                    "description": "Temperature of the water flowing through a pipes."
+                                }
+                            }
+                        },
+                        "screen_energy": {
+                            "type": "screen",
+                            "name": "Energy",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "screen_blackout": {
+                            "type": "screen",
+                            "name": "Blackout",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "water_supply": {
+                            "type": "water",
+                            "name": "Supply",
+                            "datastreams": {
+                                "water_flow_duration": {
+                                    "property_name": "Flow Duration",
+                                    "unit": "minute",
+                                    "type": "measurement",
+                                    "description": "The duration of water flow."
+                                },
+                                "water_supply_interval_vip": {
+                                    "property_name": "Water Supply Interval: ViP",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                },
+                                "water_supply_interval_setpoint": {
+                                    "property_name": "Water Supply Interval: Setpoint",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                }
+                            }
+                        },
+                        "water_drain": {
+                            "type": "water",
+                            "name": "Drain",
+                            "datastreams": {
+                                "water_volume": {
+                                    "property_name": "Volume",
+                                    "unit": "liter / meter ** 2",
+                                    "type": "measurement",
+                                    "description": "The volume of water measured."
+                                },
+                                "ec": {
+                                    "property_name": "EC",
+                                    "unit": "decisiemens / meter",
+                                    "type": "measurement",
+                                    "description": "Electrical conducitivity."
+                                },
+                                "ph": {
+                                    "property_name": "pH",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "pH value"
+                                }
+                            }
+                        },
+                        "substrate": {
+                            "type": "substrate",
+                            "name": "Substrate",
+                            "datastreams": {
+                                "relative_permittivity": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.1": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.1": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.1": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.2": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.2": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.2": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                }
+                            }
+                        }
+                    }
+                },
+                "dwarf_tomato": {
+                    "name": "Dwarf Tomato",
+                    "type": "crop",
+                    "datastreams": {
+                        "plant_density": {
+                            "property_name": "Plant Density",
+                            "unit": "plant / meter ** 2",
+                            "type": "parameter",
+                            "description": "Plant density"
+                        },
+                        "harvest_date": {
+                            "property_name": "Harvest Date",
+                            "unit": "count",
+                            "type": "parameter",
+                            "description": "Day number"
+                        },
+                        "pot_area": {
+                            "property_name": "Pot Area",
+                            "unit": "meter ** 2 / plant",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "economics": {
+                    "type": "economics",
+                    "datastreams": {
+                        "fixed_costs.per_m2": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "fixed_costs.per_pot": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_m2": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_pot": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_m2": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_pot": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_m2": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_pot": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "energy": {
+                    "type": "energy",
+                    "datastreams": {
+                        "energy_use.heating": {
+                            "property_name": "Energy Use",
+                            "unit": "megajoule",
+                            "type": "measurement",
+                            "description": "Energy consumption"
+                        },
+                        "electricity_use.lighting": {
+                            "property_name": "Electricity Use",
+                            "unit": "kilowatt_hour",
+                            "type": "measurement",
+                            "description": "Electricity consumption"
+                        },
+                        "co2_dosage": {
+                            "property_name": "CO2 Dosage",
+                            "unit": "kilogram / meter ** 2",
+                            "type": "measurement"
+                        }
+                    },
+                    "components": {}
+                }
+            }
+        },
+        "mugrow": {
+            "name": "MuGrow",
+            "type": "cultivation",
+            "components": {
+                "compartment": {
+                    "name": "302",
+                    "type": "compartment",
+                    "datastreams": {
+                        "air_temperature": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "par": {
+                            "property_name": "PAR Light Intensity",
+                            "unit": "micromole / meter ** 2 / second",
+                            "type": "measurement",
+                            "description": "Amount of PAR light - technically it is the PPFD (Photosynthetic Photon Flux Density)"
+                        },
+                        "co2_concentration": {
+                            "property_name": "CO2 Concentration",
+                            "unit": "ppm",
+                            "type": "measurement",
+                            "description": "Measured CO2 concentration in the air"
+                        },
+                        "humidity_deficit": {
+                            "property_name": "Humidity Deficit",
+                            "unit": "gram / meter ** 3",
+                            "type": "measurement",
+                            "description": "Humidity deficit is the water mass missing for the air to reach saturation."
+                        },
+                        "window_position_lee_side": {
+                            "property_name": "Window Position: Lee Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "window_position_wind_side": {
+                            "property_name": "Window Position: Wind Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on side where the wind is coming from, where 0 means closed."
+                        },
+                        "co2_actuation_state": {
+                            "property_name": "CO2 Actuation State",
+                            "unit": "dimensionless",
+                            "type": "measurement",
+                            "description": "1 = on, 2 = out"
+                        },
+                        "co2_dosage_minutes_cumulative": {
+                            "property_name": "CO2 Dosage Minutes",
+                            "unit": "minute",
+                            "type": "measurement",
+                            "description": "Total minutes of CO2 dosed since reset."
+                        },
+                        "heating_temperature_vip": {
+                            "property_name": "Air Temperature: Heating ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the ViP, heating is activated. ViP = setpoint + influences"
+                        },
+                        "heating_temperature_setpoint": {
+                            "property_name": "Air Temperature: Heating Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the setpoint, heating is activated."
+                        },
+                        "ventilation_temperature_lee_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Lee Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_wind_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Wind Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_setpoint": {
+                            "property_name": "Air Temperature: Ventilation Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the setpoint, windows are opened."
+                        },
+                        "minimum_window_position_lee_side_vip": {
+                            "property_name": "Minimum Window Position: Lee Side ViP",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_window_position_lee_side_setpoint": {
+                            "property_name": "Minimum Window Position: Lee Side Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_pipe_temperature_vip": {
+                            "property_name": "Heating Pipe: Minimum Temperature ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "minimum_pipe_temperature_setpoint": {
+                            "property_name": "Heating Pipe: Minimum Temperature Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "lamps_activation_percentage": {
+                            "property_name": "Activation Percentage",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "lamps_activation_percentage_setpoint": {
+                            "property_name": "Activation Percentage: Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "co2_concentration_vip": {
+                            "property_name": "Air CO2 Concentration: ViP",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "co2_concentration_setpoint": {
+                            "property_name": "CO2 Concentration: Setpoint",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "humidity_deficit_vip": {
+                            "property_name": "Humidity Deficit: ViP",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        },
+                        "humidity_deficit_setpoint": {
+                            "property_name": "Humidity Deficit: Setpoint",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        }
+                    },
+                    "components": {
+                        "heating_lower_circuit": {
+                            "type": "heating",
+                            "name": "Lower Circuit",
+                            "datastreams": {
+                                "pipe_temperature": {
+                                    "property_name": "Pipe Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement",
+                                    "description": "Temperature of the water flowing through a pipes."
+                                }
+                            }
+                        },
+                        "screen_energy": {
+                            "type": "screen",
+                            "name": "Energy",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "screen_blackout": {
+                            "type": "screen",
+                            "name": "Blackout",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "water_supply": {
+                            "type": "water",
+                            "name": "Supply",
+                            "datastreams": {
+                                "water_flow_duration": {
+                                    "property_name": "Flow Duration",
+                                    "unit": "minute",
+                                    "type": "measurement",
+                                    "description": "The duration of water flow."
+                                },
+                                "water_supply_interval_vip": {
+                                    "property_name": "Water Supply Interval: ViP",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                },
+                                "water_supply_interval_setpoint": {
+                                    "property_name": "Water Supply Interval: Setpoint",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                }
+                            }
+                        },
+                        "water_drain": {
+                            "type": "water",
+                            "name": "Drain",
+                            "datastreams": {
+                                "water_volume": {
+                                    "property_name": "Volume",
+                                    "unit": "liter / meter ** 2",
+                                    "type": "measurement",
+                                    "description": "The volume of water measured."
+                                },
+                                "ec": {
+                                    "property_name": "EC",
+                                    "unit": "decisiemens / meter",
+                                    "type": "measurement",
+                                    "description": "Electrical conducitivity."
+                                },
+                                "ph": {
+                                    "property_name": "pH",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "pH value"
+                                }
+                            }
+                        },
+                        "substrate": {
+                            "type": "substrate",
+                            "name": "Substrate",
+                            "datastreams": {
+                                "relative_permittivity": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.1": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.1": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.1": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.2": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.2": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.2": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                }
+                            }
+                        },
+                        "fluorescence": {
+                            "type": "fluorescence",
+                            "name": "Fluorescence",
+                            "datastreams": {
+                                "gardin_efficiency": {
+                                    "property_name": "Gardin Efficiency",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "Efficiency of photosystem-II"
+                                },
+                                "gardin_health": {
+                                    "property_name": "Gardin Health",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "Photosynthetic capacity"
+                                },
+                                "gardin_energy_balance": {
+                                    "property_name": "Gardin Energy Balance",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "Measure of light saturation"
+                                },
+                                "gardin_productivity": {
+                                    "property_name": "Gardin Productivity",
+                                    "unit": "micromole",
+                                    "type": "measurement",
+                                    "description": "Electron transport"
+                                },
+                                "gardin_actinic": {
+                                    "property_name": "Gardin Actinic",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "Leaf response"
+                                },
+                                "gardin_qe": {
+                                    "property_name": "Gardin Qe",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "Quantum Yield"
+                                }
+                            }
+                        }
+                    }
+                },
+                "dwarf_tomato": {
+                    "name": "Dwarf Tomato",
+                    "type": "crop",
+                    "datastreams": {
+                        "plant_density": {
+                            "property_name": "Plant Density",
+                            "unit": "plant / meter ** 2",
+                            "type": "parameter",
+                            "description": "Plant density"
+                        },
+                        "harvest_date": {
+                            "property_name": "Harvest Date",
+                            "unit": "count",
+                            "type": "parameter",
+                            "description": "Day number"
+                        },
+                        "pot_area": {
+                            "property_name": "Pot Area",
+                            "unit": "meter ** 2 / plant",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "economics": {
+                    "type": "economics",
+                    "datastreams": {
+                        "fixed_costs.per_m2": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "fixed_costs.per_pot": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_m2": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_pot": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_m2": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_pot": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_m2": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_pot": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "energy": {
+                    "type": "energy",
+                    "datastreams": {
+                        "energy_use.heating": {
+                            "property_name": "Energy Use",
+                            "unit": "megajoule",
+                            "type": "measurement",
+                            "description": "Energy consumption"
+                        },
+                        "electricity_use.lighting": {
+                            "property_name": "Electricity Use",
+                            "unit": "kilowatt_hour",
+                            "type": "measurement",
+                            "description": "Electricity consumption"
+                        },
+                        "co2_dosage": {
+                            "property_name": "CO2 Dosage",
+                            "unit": "kilogram / meter ** 2",
+                            "type": "measurement"
+                        }
+                    },
+                    "components": {}
+                }
+            }
+        },
+        "reference": {
+            "name": "Reference",
+            "type": "cultivation",
+            "components": {
+                "compartment": {
+                    "name": "306",
+                    "type": "compartment",
+                    "datastreams": {
+                        "air_temperature": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "par": {
+                            "property_name": "PAR Light Intensity",
+                            "unit": "micromole / meter ** 2 / second",
+                            "type": "measurement",
+                            "description": "Amount of PAR light - technically it is the PPFD (Photosynthetic Photon Flux Density)"
+                        },
+                        "co2_concentration": {
+                            "property_name": "CO2 Concentration",
+                            "unit": "ppm",
+                            "type": "measurement",
+                            "description": "Measured CO2 concentration in the air"
+                        },
+                        "humidity_deficit": {
+                            "property_name": "Humidity Deficit",
+                            "unit": "gram / meter ** 3",
+                            "type": "measurement",
+                            "description": "Humidity deficit is the water mass missing for the air to reach saturation."
+                        },
+                        "window_position_lee_side": {
+                            "property_name": "Window Position: Lee Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "window_position_wind_side": {
+                            "property_name": "Window Position: Wind Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on side where the wind is coming from, where 0 means closed."
+                        },
+                        "co2_actuation_state": {
+                            "property_name": "CO2 Actuation State",
+                            "unit": "dimensionless",
+                            "type": "measurement",
+                            "description": "1 = on, 2 = out"
+                        },
+                        "co2_dosage_minutes_cumulative": {
+                            "property_name": "CO2 Dosage Minutes",
+                            "unit": "minute",
+                            "type": "measurement",
+                            "description": "Total minutes of CO2 dosed since reset."
+                        },
+                        "heating_temperature_vip": {
+                            "property_name": "Air Temperature: Heating ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the ViP, heating is activated. ViP = setpoint + influences"
+                        },
+                        "heating_temperature_setpoint": {
+                            "property_name": "Air Temperature: Heating Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the setpoint, heating is activated."
+                        },
+                        "ventilation_temperature_lee_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Lee Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_wind_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Wind Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_setpoint": {
+                            "property_name": "Air Temperature: Ventilation Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the setpoint, windows are opened."
+                        },
+                        "minimum_window_position_lee_side_vip": {
+                            "property_name": "Minimum Window Position: Lee Side ViP",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_window_position_lee_side_setpoint": {
+                            "property_name": "Minimum Window Position: Lee Side Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_pipe_temperature_vip": {
+                            "property_name": "Heating Pipe: Minimum Temperature ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "minimum_pipe_temperature_setpoint": {
+                            "property_name": "Heating Pipe: Minimum Temperature Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "lamps_activation_percentage": {
+                            "property_name": "Activation Percentage",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "lamps_activation_percentage_setpoint": {
+                            "property_name": "Activation Percentage: Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "co2_concentration_vip": {
+                            "property_name": "Air CO2 Concentration: ViP",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "co2_concentration_setpoint": {
+                            "property_name": "CO2 Concentration: Setpoint",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "humidity_deficit_vip": {
+                            "property_name": "Humidity Deficit: ViP",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        },
+                        "humidity_deficit_setpoint": {
+                            "property_name": "Humidity Deficit: Setpoint",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        }
+                    },
+                    "components": {
+                        "heating_lower_circuit": {
+                            "type": "heating",
+                            "name": "Lower Circuit",
+                            "datastreams": {
+                                "pipe_temperature": {
+                                    "property_name": "Pipe Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement",
+                                    "description": "Temperature of the water flowing through a pipes."
+                                }
+                            }
+                        },
+                        "screen_energy": {
+                            "type": "screen",
+                            "name": "Energy",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "screen_blackout": {
+                            "type": "screen",
+                            "name": "Blackout",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "water_supply": {
+                            "type": "water",
+                            "name": "Supply",
+                            "datastreams": {
+                                "water_flow_duration": {
+                                    "property_name": "Flow Duration",
+                                    "unit": "minute",
+                                    "type": "measurement",
+                                    "description": "The duration of water flow."
+                                },
+                                "water_supply_interval_vip": {
+                                    "property_name": "Water Supply Interval: ViP",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                },
+                                "water_supply_interval_setpoint": {
+                                    "property_name": "Water Supply Interval: Setpoint",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                }
+                            }
+                        },
+                        "water_drain": {
+                            "type": "water",
+                            "name": "Drain",
+                            "datastreams": {
+                                "water_volume": {
+                                    "property_name": "Volume",
+                                    "unit": "liter / meter ** 2",
+                                    "type": "measurement",
+                                    "description": "The volume of water measured."
+                                },
+                                "ec": {
+                                    "property_name": "EC",
+                                    "unit": "decisiemens / meter",
+                                    "type": "measurement",
+                                    "description": "Electrical conducitivity."
+                                },
+                                "ph": {
+                                    "property_name": "pH",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "pH value"
+                                }
+                            }
+                        }
+                    }
+                },
+                "dwarf_tomato": {
+                    "name": "Dwarf Tomato",
+                    "type": "crop",
+                    "datastreams": {
+                        "plant_density": {
+                            "property_name": "Plant Density",
+                            "unit": "plant / meter ** 2",
+                            "type": "parameter",
+                            "description": "Plant density"
+                        },
+                        "harvest_date": {
+                            "property_name": "Harvest Date",
+                            "unit": "count",
+                            "type": "parameter",
+                            "description": "Day number"
+                        },
+                        "pot_area": {
+                            "property_name": "Pot Area",
+                            "unit": "meter ** 2 / plant",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "economics": {
+                    "type": "economics",
+                    "datastreams": {
+                        "fixed_costs.per_m2": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "fixed_costs.per_pot": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_m2": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_pot": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_m2": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_pot": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_m2": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_pot": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "energy": {
+                    "type": "energy",
+                    "datastreams": {
+                        "energy_use.heating": {
+                            "property_name": "Energy Use",
+                            "unit": "megajoule",
+                            "type": "measurement",
+                            "description": "Energy consumption"
+                        },
+                        "electricity_use.lighting": {
+                            "property_name": "Electricity Use",
+                            "unit": "kilowatt_hour",
+                            "type": "measurement",
+                            "description": "Electricity consumption"
+                        },
+                        "co2_dosage": {
+                            "property_name": "CO2 Dosage",
+                            "unit": "kilogram / meter ** 2",
+                            "type": "measurement"
+                        }
+                    },
+                    "components": {}
+                }
+            }
+        },
+        "tomatonuts": {
+            "name": "Tomatonuts",
+            "type": "cultivation",
+            "components": {
+                "compartment": {
+                    "name": "301",
+                    "type": "compartment",
+                    "datastreams": {
+                        "air_temperature": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "par": {
+                            "property_name": "PAR Light Intensity",
+                            "unit": "micromole / meter ** 2 / second",
+                            "type": "measurement",
+                            "description": "Amount of PAR light - technically it is the PPFD (Photosynthetic Photon Flux Density)"
+                        },
+                        "co2_concentration": {
+                            "property_name": "CO2 Concentration",
+                            "unit": "ppm",
+                            "type": "measurement",
+                            "description": "Measured CO2 concentration in the air"
+                        },
+                        "humidity_deficit": {
+                            "property_name": "Humidity Deficit",
+                            "unit": "gram / meter ** 3",
+                            "type": "measurement",
+                            "description": "Humidity deficit is the water mass missing for the air to reach saturation."
+                        },
+                        "window_position_lee_side": {
+                            "property_name": "Window Position: Lee Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "window_position_wind_side": {
+                            "property_name": "Window Position: Wind Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on side where the wind is coming from, where 0 means closed."
+                        },
+                        "co2_actuation_state": {
+                            "property_name": "CO2 Actuation State",
+                            "unit": "dimensionless",
+                            "type": "measurement",
+                            "description": "1 = on, 2 = out"
+                        },
+                        "co2_dosage_minutes_cumulative": {
+                            "property_name": "CO2 Dosage Minutes",
+                            "unit": "minute",
+                            "type": "measurement",
+                            "description": "Total minutes of CO2 dosed since reset."
+                        },
+                        "heating_temperature_vip": {
+                            "property_name": "Air Temperature: Heating ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the ViP, heating is activated. ViP = setpoint + influences"
+                        },
+                        "heating_temperature_setpoint": {
+                            "property_name": "Air Temperature: Heating Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the setpoint, heating is activated."
+                        },
+                        "ventilation_temperature_lee_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Lee Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_wind_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Wind Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_setpoint": {
+                            "property_name": "Air Temperature: Ventilation Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the setpoint, windows are opened."
+                        },
+                        "minimum_window_position_lee_side_vip": {
+                            "property_name": "Minimum Window Position: Lee Side ViP",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_window_position_lee_side_setpoint": {
+                            "property_name": "Minimum Window Position: Lee Side Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_pipe_temperature_vip": {
+                            "property_name": "Heating Pipe: Minimum Temperature ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "minimum_pipe_temperature_setpoint": {
+                            "property_name": "Heating Pipe: Minimum Temperature Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "lamps_activation_percentage": {
+                            "property_name": "Activation Percentage",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "lamps_activation_percentage_setpoint": {
+                            "property_name": "Activation Percentage: Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "co2_concentration_vip": {
+                            "property_name": "Air CO2 Concentration: ViP",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "co2_concentration_setpoint": {
+                            "property_name": "CO2 Concentration: Setpoint",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "humidity_deficit_vip": {
+                            "property_name": "Humidity Deficit: ViP",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        },
+                        "humidity_deficit_setpoint": {
+                            "property_name": "Humidity Deficit: Setpoint",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        }
+                    },
+                    "components": {
+                        "heating_lower_circuit": {
+                            "type": "heating",
+                            "name": "Lower Circuit",
+                            "datastreams": {
+                                "pipe_temperature": {
+                                    "property_name": "Pipe Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement",
+                                    "description": "Temperature of the water flowing through a pipes."
+                                }
+                            }
+                        },
+                        "screen_energy": {
+                            "type": "screen",
+                            "name": "Energy",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "screen_blackout": {
+                            "type": "screen",
+                            "name": "Blackout",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "water_supply": {
+                            "type": "water",
+                            "name": "Supply",
+                            "datastreams": {
+                                "water_flow_duration": {
+                                    "property_name": "Flow Duration",
+                                    "unit": "minute",
+                                    "type": "measurement",
+                                    "description": "The duration of water flow."
+                                },
+                                "water_supply_interval_vip": {
+                                    "property_name": "Water Supply Interval: ViP",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                },
+                                "water_supply_interval_setpoint": {
+                                    "property_name": "Water Supply Interval: Setpoint",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                }
+                            }
+                        },
+                        "water_drain": {
+                            "type": "water",
+                            "name": "Drain",
+                            "datastreams": {
+                                "water_volume": {
+                                    "property_name": "Volume",
+                                    "unit": "liter / meter ** 2",
+                                    "type": "measurement",
+                                    "description": "The volume of water measured."
+                                },
+                                "ec": {
+                                    "property_name": "EC",
+                                    "unit": "decisiemens / meter",
+                                    "type": "measurement",
+                                    "description": "Electrical conducitivity."
+                                },
+                                "ph": {
+                                    "property_name": "pH",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "pH value"
+                                }
+                            }
+                        },
+                        "substrate": {
+                            "type": "substrate",
+                            "name": "Substrate",
+                            "datastreams": {
+                                "relative_permittivity": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.1": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.1": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.1": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.2": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.2": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.2": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                }
+                            }
+                        }
+                    }
+                },
+                "dwarf_tomato": {
+                    "name": "Dwarf Tomato",
+                    "type": "crop",
+                    "datastreams": {
+                        "plant_density": {
+                            "property_name": "Plant Density",
+                            "unit": "plant / meter ** 2",
+                            "type": "parameter",
+                            "description": "Plant density"
+                        },
+                        "harvest_date": {
+                            "property_name": "Harvest Date",
+                            "unit": "count",
+                            "type": "parameter",
+                            "description": "Day number"
+                        },
+                        "pot_area": {
+                            "property_name": "Pot Area",
+                            "unit": "meter ** 2 / plant",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "economics": {
+                    "type": "economics",
+                    "datastreams": {
+                        "fixed_costs.per_m2": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "fixed_costs.per_pot": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_m2": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_pot": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_m2": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_pot": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_m2": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_pot": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "energy": {
+                    "type": "energy",
+                    "datastreams": {
+                        "energy_use.heating": {
+                            "property_name": "Energy Use",
+                            "unit": "megajoule",
+                            "type": "measurement",
+                            "description": "Energy consumption"
+                        },
+                        "electricity_use.lighting": {
+                            "property_name": "Electricity Use",
+                            "unit": "kilowatt_hour",
+                            "type": "measurement",
+                            "description": "Electricity consumption"
+                        },
+                        "co2_dosage": {
+                            "property_name": "CO2 Dosage",
+                            "unit": "kilogram / meter ** 2",
+                            "type": "measurement"
+                        }
+                    },
+                    "components": {}
+                }
+            }
+        },
+        "trigger": {
+            "name": "Trigger",
+            "type": "cultivation",
+            "components": {
+                "compartment": {
+                    "name": "308",
+                    "type": "compartment",
+                    "datastreams": {
+                        "air_temperature": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "par": {
+                            "property_name": "PAR Light Intensity",
+                            "unit": "micromole / meter ** 2 / second",
+                            "type": "measurement",
+                            "description": "Amount of PAR light - technically it is the PPFD (Photosynthetic Photon Flux Density)"
+                        },
+                        "co2_concentration": {
+                            "property_name": "CO2 Concentration",
+                            "unit": "ppm",
+                            "type": "measurement",
+                            "description": "Measured CO2 concentration in the air"
+                        },
+                        "humidity_deficit": {
+                            "property_name": "Humidity Deficit",
+                            "unit": "gram / meter ** 3",
+                            "type": "measurement",
+                            "description": "Humidity deficit is the water mass missing for the air to reach saturation."
+                        },
+                        "window_position_lee_side": {
+                            "property_name": "Window Position: Lee Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "window_position_wind_side": {
+                            "property_name": "Window Position: Wind Side",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "Fraction of window opening on side where the wind is coming from, where 0 means closed."
+                        },
+                        "co2_actuation_state": {
+                            "property_name": "CO2 Actuation State",
+                            "unit": "dimensionless",
+                            "type": "measurement",
+                            "description": "1 = on, 2 = out"
+                        },
+                        "co2_dosage_minutes_cumulative": {
+                            "property_name": "CO2 Dosage Minutes",
+                            "unit": "minute",
+                            "type": "measurement",
+                            "description": "Total minutes of CO2 dosed since reset."
+                        },
+                        "heating_temperature_vip": {
+                            "property_name": "Air Temperature: Heating ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the ViP, heating is activated. ViP = setpoint + influences"
+                        },
+                        "heating_temperature_setpoint": {
+                            "property_name": "Air Temperature: Heating Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature deceases below the setpoint, heating is activated."
+                        },
+                        "ventilation_temperature_lee_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Lee Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_wind_side_vip": {
+                            "property_name": "Air Temperature: Ventilation Wind Side ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the ViP, windows are opened. ViP = setpoint + influences"
+                        },
+                        "ventilation_temperature_setpoint": {
+                            "property_name": "Air Temperature: Ventilation Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "If the air temperature rises above the setpoint, windows are opened."
+                        },
+                        "minimum_window_position_lee_side_vip": {
+                            "property_name": "Minimum Window Position: Lee Side ViP",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_window_position_lee_side_setpoint": {
+                            "property_name": "Minimum Window Position: Lee Side Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "Minimum Fraction of window opening on the side where the wind is not coming from, where 0 means closed."
+                        },
+                        "minimum_pipe_temperature_vip": {
+                            "property_name": "Heating Pipe: Minimum Temperature ViP",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "minimum_pipe_temperature_setpoint": {
+                            "property_name": "Heating Pipe: Minimum Temperature Setpoint",
+                            "unit": "degree_Celsius",
+                            "type": "parameter",
+                            "description": "Minimum Temperature of the water flowing through the heating pipes."
+                        },
+                        "lamps_activation_percentage": {
+                            "property_name": "Activation Percentage",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "lamps_activation_percentage_setpoint": {
+                            "property_name": "Activation Percentage: Setpoint",
+                            "unit": "percent",
+                            "type": "parameter",
+                            "description": "0 = lamps off, 100 = lamps fully on"
+                        },
+                        "co2_concentration_vip": {
+                            "property_name": "Air CO2 Concentration: ViP",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "co2_concentration_setpoint": {
+                            "property_name": "CO2 Concentration: Setpoint",
+                            "unit": "ppm",
+                            "type": "parameter",
+                            "description": "Target CO2 concentration in the air"
+                        },
+                        "humidity_deficit_vip": {
+                            "property_name": "Humidity Deficit: ViP",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        },
+                        "humidity_deficit_setpoint": {
+                            "property_name": "Humidity Deficit: Setpoint",
+                            "unit": "gram / meter ** 3",
+                            "type": "parameter",
+                            "description": "Target humidity deficit"
+                        },
+                        "mass.plant": {
+                            "property_name": "Mass",
+                            "unit": "gram",
+                            "type": "measurement",
+                            "description": "Firefly Standing Scale"
+                        },
+                        "leaf_temperature": {
+                            "property_name": "Leaf Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Quantified Firefly Infrared Thermometer 1"
+                        },
+                        "leaf_temperature.1": {
+                            "property_name": "Leaf Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Quantified Firefly Infrared Thermometer 2"
+                        }
+                    },
+                    "components": {
+                        "heating_lower_circuit": {
+                            "type": "heating",
+                            "name": "Lower Circuit",
+                            "datastreams": {
+                                "pipe_temperature": {
+                                    "property_name": "Pipe Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement",
+                                    "description": "Temperature of the water flowing through a pipes."
+                                }
+                            }
+                        },
+                        "screen_energy": {
+                            "type": "screen",
+                            "name": "Energy",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "screen_blackout": {
+                            "type": "screen",
+                            "name": "Blackout",
+                            "datastreams": {
+                                "screen_position": {
+                                    "property_name": "Screen Position",
+                                    "unit": "percent",
+                                    "type": "measurement",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_vip": {
+                                    "property_name": "Position: ViP",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                },
+                                "screen_position_setpoint": {
+                                    "property_name": "Position: Setpoint",
+                                    "unit": "percent",
+                                    "type": "parameter",
+                                    "description": "The position of the screen, where 0 means not used."
+                                }
+                            }
+                        },
+                        "water_supply": {
+                            "type": "water",
+                            "name": "Supply",
+                            "datastreams": {
+                                "water_flow_duration": {
+                                    "property_name": "Flow Duration",
+                                    "unit": "minute",
+                                    "type": "measurement",
+                                    "description": "The duration of water flow."
+                                },
+                                "water_supply_interval_vip": {
+                                    "property_name": "Water Supply Interval: ViP",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                },
+                                "water_supply_interval_setpoint": {
+                                    "property_name": "Water Supply Interval: Setpoint",
+                                    "unit": "minute",
+                                    "type": "parameter",
+                                    "description": "The interval between subsequent water supply shots"
+                                }
+                            }
+                        },
+                        "water_drain": {
+                            "type": "water",
+                            "name": "Drain",
+                            "datastreams": {
+                                "water_volume": {
+                                    "property_name": "Volume",
+                                    "unit": "liter / meter ** 2",
+                                    "type": "measurement",
+                                    "description": "The volume of water measured."
+                                },
+                                "ec": {
+                                    "property_name": "EC",
+                                    "unit": "decisiemens / meter",
+                                    "type": "measurement",
+                                    "description": "Electrical conducitivity."
+                                },
+                                "ph": {
+                                    "property_name": "pH",
+                                    "unit": "dimensionless",
+                                    "type": "measurement",
+                                    "description": "pH value"
+                                }
+                            }
+                        },
+                        "substrate": {
+                            "type": "substrate",
+                            "name": "Substrate",
+                            "datastreams": {
+                                "relative_permittivity": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.1": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.1": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.1": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                },
+                                "relative_permittivity.2": {
+                                    "property_name": "Relative Permittivity",
+                                    "unit": "percent",
+                                    "type": "measurement"
+                                },
+                                "bulk_ec.2": {
+                                    "property_name": "Bulk EC",
+                                    "unit": "millisiemens / centimeter",
+                                    "type": "measurement",
+                                    "description": "Bulk EC is the EC (electrical conductivity) measured from the soil (solid components, pore water, and air)."
+                                },
+                                "substrate_temperature.2": {
+                                    "property_name": "Substrate Temperature",
+                                    "unit": "degree_Celsius",
+                                    "type": "measurement"
+                                }
+                            }
+                        }
+                    }
+                },
+                "dwarf_tomato": {
+                    "name": "Dwarf Tomato",
+                    "type": "crop",
+                    "datastreams": {
+                        "plant_density": {
+                            "property_name": "Plant Density",
+                            "unit": "plant / meter ** 2",
+                            "type": "parameter",
+                            "description": "Plant density"
+                        },
+                        "harvest_date": {
+                            "property_name": "Harvest Date",
+                            "unit": "count",
+                            "type": "parameter",
+                            "description": "Day number"
+                        },
+                        "pot_area": {
+                            "property_name": "Pot Area",
+                            "unit": "meter ** 2 / plant",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "economics": {
+                    "type": "economics",
+                    "datastreams": {
+                        "fixed_costs.per_m2": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "fixed_costs.per_pot": {
+                            "property_name": "Fixed Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_m2": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "heating_costs.per_pot": {
+                            "property_name": "Heating Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_m2": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "co2_costs.per_pot": {
+                            "property_name": "CO2 Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_m2": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        },
+                        "lighting_costs.per_pot": {
+                            "property_name": "Lighting Costs",
+                            "unit": "euro",
+                            "type": "calculation"
+                        }
+                    },
+                    "components": {}
+                },
+                "energy": {
+                    "type": "energy",
+                    "datastreams": {
+                        "energy_use.heating": {
+                            "property_name": "Energy Use",
+                            "unit": "megajoule",
+                            "type": "measurement",
+                            "description": "Energy consumption"
+                        },
+                        "electricity_use.lighting": {
+                            "property_name": "Electricity Use",
+                            "unit": "kilowatt_hour",
+                            "type": "measurement",
+                            "description": "Electricity consumption"
+                        },
+                        "co2_dosage": {
+                            "property_name": "CO2 Dosage",
+                            "unit": "kilogram / meter ** 2",
+                            "type": "measurement"
+                        }
+                    },
+                    "components": {}
+                }
+            }
+        },
+        "weather": {
+            "name": "Weather Bleiswijk",
+            "type": "weather",
+            "datastreams": {},
+            "components": {
+                "weather": {
+                    "type": "weather",
+                    "name": "Weather",
+                    "datastreams": {
+                        "air_temperature.outside": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity.outside": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "humidity_deficit": {
+                            "property_name": "Humidity Deficit",
+                            "unit": "gram / meter ** 3",
+                            "type": "measurement",
+                            "description": "Humidity deficit is the water mass missing for the air to reach saturation."
+                        },
+                        "air_absolute_humidity_content.outside": {
+                            "property_name": "Absolute Humidity Content Of Air",
+                            "unit": "gram / meter ** 3",
+                            "type": "measurement",
+                            "description": "The actual amount of water vapor present in a given volume of air"
+                        },
+                        "radiation_global": {
+                            "property_name": "Global Solar Radiation",
+                            "unit": "watt / meter ** 2",
+                            "type": "measurement",
+                            "description": "Total amount of solar radiation"
+                        },
+                        "radiation_sum": {
+                            "property_name": "Accumulated Solar Radiation",
+                            "unit": "joule / centimeter ** 2",
+                            "type": "measurement",
+                            "description": "Daily radiation sum"
+                        },
+                        "wind_speed": {
+                            "property_name": "Wind Speed",
+                            "unit": "meter / second",
+                            "type": "measurement",
+                            "description": "Wind speed"
+                        },
+                        "wind_direction.registration": {
+                            "property_name": "Wind Direction",
+                            "unit": "degree",
+                            "type": "measurement",
+                            "description": "Wind direction measured clockwise with 0 degrees being north."
+                        },
+                        "rain_state": {
+                            "property_name": "Rain State",
+                            "unit": "dimensionless",
+                            "type": "measurement",
+                            "description": "1 = rain, 0 = dry."
+                        },
+                        "par.outside": {
+                            "property_name": "PAR Light Intensity",
+                            "unit": "micromole / meter ** 2 / second",
+                            "type": "measurement",
+                            "description": "Amount of PAR light - technically it is the PPFD (Photosynthetic Photon Flux Density)"
+                        },
+                        "heat_emission": {
+                            "property_name": "Heat Emission",
+                            "unit": "watt / meter ** 2",
+                            "type": "measurement",
+                            "description": "Heat emission as measured with a pyrgeometer"
+                        }
+                    }
+                }
+            }
+        },
+        "weather_forecast": {
+            "name": "Weather Forecast Bleiswijk",
+            "type": "weather_forecast",
+            "datastreams": {},
+            "components": {
+                "weather_forecast": {
+                    "type": "weather_forecast",
+                    "name": "Weather Forecast",
+                    "datastreams": {
+                        "air_temperature.outside": {
+                            "property_name": "Air Temperature",
+                            "unit": "degree_Celsius",
+                            "type": "measurement",
+                            "description": "Measured air temperature."
+                        },
+                        "relative_humidity.outside": {
+                            "property_name": "Relative Humidity",
+                            "unit": "percent",
+                            "type": "measurement",
+                            "description": "The amount of moisture in the air relative to the maximum amount the air can hold at the current moment."
+                        },
+                        "radiation_global": {
+                            "property_name": "Global Solar Radiation",
+                            "unit": "watt / meter ** 2",
+                            "type": "measurement",
+                            "description": "Total amount of solar radiation"
+                        },
+                        "radiation_sum": {
+                            "property_name": "Accumulated Solar Radiation",
+                            "unit": "joule / centimeter ** 2",
+                            "type": "measurement",
+                            "description": "Daily radiation sum"
+                        },
+                        "wind_speed": {
+                            "property_name": "Wind Speed",
+                            "unit": "meter / second",
+                            "type": "measurement",
+                            "description": "Wind speed"
+                        },
+                        "degree_of_cloudiness": {
+                            "property_name": "Degree Of Cloudiness",
+                            "unit": "dimensionless",
+                            "type": "measurement",
+                            "description": "Degree Of Cloudiness"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,768 @@
+<meta name="dash-one-writer">
+<style>
+.tr-page { display: flex; flex-direction: column; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.tr-head h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0 0 var(--cds-gap-sm); text-wrap: balance; }
+.tr-lede { font-size: var(--cds-font-size-body); max-width: 68ch; line-height: 1.5; margin: 0; }
+.tr-lede b { font-variant-numeric: tabular-nums; }
+.tr-sub { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: var(--cds-gap-xs) 0 0; }
+.tr-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 3; background: var(--color-bg); padding-block: var(--cds-pad-sm); }
+.tr-legend .tr-label { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-right: var(--cds-gap-xs); }
+.tr-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: var(--cds-font-size-caption); cursor: pointer; }
+.tr-chip:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+.tr-chip.is-dim { opacity: .4; }
+.tr-chip.is-on { border-color: var(--color-fg); }
+.tr-sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.tr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: var(--cds-gap-lg); }
+.tr-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+.tr-card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; text-wrap: balance; }
+.tr-card p { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.45; max-width: 70ch; }
+.tr-chart { position: relative; min-height: 270px; width: 100%; }
+.tr-chart svg { display: block; overflow: visible; }
+.tr-chart .axis text { fill: var(--cds-text-secondary); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); }
+.tr-chart .axis path, .tr-chart .axis line { stroke: var(--cds-chart-axis); }
+.tr-chart .grid line { stroke: var(--cds-chart-grid); }
+.tr-chart .grid path { display: none; }
+.tr-chart .axlabel { fill: var(--cds-text-secondary); font-size: var(--cds-font-size-caption); }
+.tr-chart .ref { stroke: var(--cds-chart-reference); stroke-dasharray: 4 3; }
+.tr-chart .reftext { fill: var(--cds-text-secondary); font-size: var(--cds-font-size-caption); }
+.tr-tt { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); box-shadow: var(--cds-shadow-popover); border-radius: var(--cds-radius); padding: 6px 8px; font-size: var(--cds-font-size-caption); color: var(--color-fg); white-space: nowrap; z-index: 2; }
+.tr-tt .k { color: var(--cds-text-secondary); }
+.tr-row { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; justify-content: space-between; }
+.tr-tablewrap { overflow-x: auto; }
+.tr-table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.tr-table th, .tr-table td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.tr-table th:first-child, .tr-table td:first-child { text-align: left; }
+.tr-table th { color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); }
+.tr-notes { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; }
+.tr-notes summary { cursor: pointer; color: var(--color-fg); }
+.tr-notes ul { padding-left: 1.2em; margin: var(--cds-gap-sm) 0 0; display: flex; flex-direction: column; gap: 4px; max-width: 80ch; }
+.tr-fail { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); padding: var(--cds-pad-md) 0; }
+[data-dash-source-state=refreshing] { opacity: .5; }
+.fc-day { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.fc-day input[type=range] { flex: 1 1 220px; min-width: 0; accent-color: var(--color-fg); }
+.fc-day output { font-variant-numeric: tabular-nums; color: var(--color-fg); min-width: 6ch; }
+.fc-summary { color: var(--color-fg) !important; font-size: var(--cds-font-size-body) !important; line-height: 1.5; }
+.fc-summary b { font-variant-numeric: tabular-nums; }
+.fc-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: var(--cds-gap-lg); }
+.fc-block { display: flex; flex-direction: column; gap: var(--cds-gap-xs); min-width: 0; }
+.fc-block h3 { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.tr-chart .band { fill-opacity: .18; stroke: none; }
+.tr-chart .marker { stroke: var(--color-fg); stroke-width: 1; stroke-dasharray: 2 3; }
+.tr-chart .marktext { fill: var(--color-fg); font-size: var(--cds-font-size-caption); }
+</style>
+
+<div class="tr-page">
+  <header class="tr-head" id="overview">
+    <h1>Dwarf tomato ripening</h1>
+    <p class="tr-lede">Six greenhouse rooms grew the same dwarf tomato from 3 Sep 2024, each run by a different grower. Red fruit first showed in the photos of <b data-draw="first-room" data-source="headline" data-field="first_room" data-row="0">—</b> on <b data-draw="first-date" data-source="headline" data-field="first_date" data-row="0">—</b>. By the 5 Nov check, <b data-draw="fast-room" data-source="headline" data-field="fast_room" data-row="0">—</b> fruit was <b data-draw="fast-pct" data-source="headline" data-field="fast_pct" data-row="0">—</b>% red by weight, against <b data-draw="slow-pct" data-source="headline" data-field="slow_pct" data-row="0">—</b>% in <b data-draw="slow-room" data-source="headline" data-field="slow_room" data-row="0">—</b>.</p>
+    <p class="tr-sub">4th Autonomous Greenhouse Challenge, Wageningen University &amp; Research, Bleiswijk (NL). Hand measurements on 7 Oct, 22 Oct, 5 Nov and each room's harvest day; climate logged every 5 minutes; one overhead photo per room at 12:00.</p>
+  </header>
+
+  <nav class="tr-legend" id="room-legend" aria-label="Highlight a room">
+    <span class="tr-label">Highlight</span>
+    <button type="button" class="tr-chip" data-team="reference"><span class="tr-sw"></span>Reference</button>
+    <button type="button" class="tr-chip" data-team="ideas"><span class="tr-sw"></span>IDEAS</button>
+    <button type="button" class="tr-chip" data-team="mugrow"><span class="tr-sw"></span>MuGrow</button>
+    <button type="button" class="tr-chip" data-team="trigger"><span class="tr-sw"></span>Trigger</button>
+    <button type="button" class="tr-chip" data-team="agrifusion"><span class="tr-sw"></span>Agrifusion</button>
+    <button type="button" class="tr-chip" data-team="tomatonuts"><span class="tr-sw"></span>Tomatonuts</button>
+  </nav>
+
+  <section class="tr-card" id="rooms">
+    <h2>Each room at a glance</h2>
+    <p>Harvest is the day each grower chose. First red in photos is the first of three days in a row with red fruit visible at noon. Degree-days are the daily mean temperature above 10 °C, added up since 3 Sep.</p>
+    <div class="tr-tablewrap">
+      <table class="tr-table" data-source="rooms" data-row-key="team">
+        <thead><tr>
+          <th data-field="room">Room</th>
+          <th data-field="harvest">Harvest</th>
+          <th data-field="pct_red_nov5">% red 5 Nov</th>
+          <th data-field="pct_red_final">% red at harvest</th>
+          <th data-field="first_red_photo">First red in photos</th>
+          <th data-field="gdd_harvest">Degree-days at harvest</th>
+          <th data-field="t_late">Mean °C from 22 Oct</th>
+          <th data-field="lamp_h_late">Lamp h/day from 22 Oct</th>
+        </tr></thead>
+        <tbody data-draw="rooms-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tr-card" id="forecast">
+    <div class="tr-row">
+      <h2>Ripeness forecast and best harvest day</h2>
+      <select class="dash-select" id="fc-room" aria-label="Room to forecast">
+        <option value="reference">Reference</option>
+        <option value="ideas">IDEAS</option>
+        <option value="mugrow">MuGrow</option>
+        <option value="trigger" selected>Trigger</option>
+        <option value="agrifusion">Agrifusion</option>
+        <option value="tomatonuts">Tomatonuts</option>
+      </select>
+    </div>
+    <p>Pick a room and slide through the days. Each day's estimate uses only what was known that day: warmth so far and, once red fruit shows in the photos, the day it first appeared. The ripening curve behind it was fitted on the other five rooms, never on this one. Target: 70% of fruit weight red.</p>
+    <div class="fc-day" data-draw="fc-day"></div>
+    <p class="fc-summary" data-draw="fc-summary">—</p>
+    <div class="tr-chart dash-skeleton" data-draw="chart-forecast" data-source="fcdaily ripeness windows" role="img" aria-label="Estimated percent red over time for the chosen room, with its range, the measured values and the forecast date for 70 percent red"></div>
+    <div class="fc-block" id="fc-profit">
+      <h3>Which harvest day earns the most</h3>
+      <p>Expected net profit per m² per day of growing, the challenge's own score, for each possible harvest day as forecast on the chosen day. A pot sells only when at least a third of its fruit is red, red fruit above 150 g per pot earns nothing extra, and each extra day adds lamp, heating, CO₂ and greenhouse costs. Plants ripen unevenly, so the forecast spreads each room's plants as much as the 5 Nov weighings did. Sale price assumed €2.15 per pot, backed out from the published results; the best day stays the same anywhere between €1.75 and €2.50.</p>
+      <p class="fc-summary" data-draw="profit-summary">—</p>
+      <div class="tr-chart dash-skeleton" data-draw="chart-profit" data-source="profit best" role="img" aria-label="Expected profit per square metre per day for each possible harvest day, with the best day marked"></div>
+    </div>
+    <div class="fc-tables">
+      <div class="fc-block" id="fc-best">
+        <h3>Best harvest day for profit, as forecast on 6 Nov</h3>
+        <div class="tr-tablewrap">
+          <table class="tr-table" data-source="best" data-row-key="team,decided_on">
+            <thead><tr>
+              <th>Room</th>
+              <th data-field="best_day">Best day</th>
+              <th data-field="best_day_early">Earliest</th>
+              <th data-field="best_day_late">Latest</th>
+              <th data-field="best_pct_red">% red then</th>
+              <th data-field="best_profit_m2_day">€/m²/day at best</th>
+              <th data-field="actual_harvest">Actual harvest</th>
+              <th data-field="profit_at_actual">€/m²/day at actual</th>
+              <th data-field="gain_pct">Gain %</th>
+            </tr></thead>
+            <tbody data-draw="best-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="fc-block" id="fc-windows">
+        <h3>Harvest window as forecast on 6 Nov</h3>
+        <div class="tr-tablewrap">
+          <table class="tr-table" data-source="windows" data-row-key="team">
+            <thead><tr>
+              <th>Room</th>
+              <th data-field="forecast_date">70% red on</th>
+              <th data-field="window_start">Earliest</th>
+              <th data-field="window_end">Latest</th>
+              <th data-field="actual_harvest">Actual harvest</th>
+              <th data-field="measured_pct_at_harvest">% red at harvest</th>
+              <th data-field="days_late_vs_forecast">Days after forecast</th>
+            </tr></thead>
+            <tbody data-draw="fc-windows-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="fc-block" id="fc-accuracy">
+        <h3>How far off the forecast was</h3>
+        <p>Average miss in percentage points of red, each room forecast without its own measurements. Lower is better.</p>
+        <div class="tr-tablewrap">
+          <table class="tr-table" data-source="evaluation" data-row-key="test,model">
+            <thead><tr>
+              <th data-field="test">Test</th>
+              <th data-field="model">Model</th>
+              <th data-field="mae">Average miss</th>
+              <th data-field="n">Points</th>
+            </tr></thead>
+            <tbody data-draw="fc-eval-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="tr-grid">
+    <section class="tr-card" id="ripening">
+      <h2>Fruit stays green until late October, then reddens fast</h2>
+      <p>Share of fruit weight that is red, from plants cut and weighed by hand (6 plants per room per check; at harvest, up to 30). Lines join the measured days only.</p>
+      <div class="tr-chart dash-skeleton" data-draw="chart-ripening" data-source="ripeness" role="img" aria-label="Percent red fruit by weight per room on each measurement day"></div>
+    </section>
+
+    <section class="tr-card" id="warmth">
+      <h2>Warmer rooms ripen sooner</h2>
+      <p>The same measurements against accumulated warmth instead of calendar date. Rooms line up more closely, so warmth is a better clock for ripening than days.</p>
+      <div class="tr-chart dash-skeleton" data-draw="chart-warmth" data-source="ripeness" role="img" aria-label="Percent red fruit by weight against accumulated degree-days"></div>
+    </section>
+
+    <section class="tr-card" id="photos">
+      <h2>Red fruit visible in the daily noon photo</h2>
+      <p>Share of each photo that is ripe-red fruit, from 15 Oct until the day before harvest. Hollow dots are days the purple grow lamps were on at noon; their colour was corrected but may still read a little high.</p>
+      <div class="tr-chart dash-skeleton" data-draw="chart-photos" data-source="images" role="img" aria-label="Daily red fruit index from overhead photos per room"></div>
+    </section>
+
+    <section class="tr-card" id="spread">
+      <h2>Plants differ a lot within one room</h2>
+      <p>Red fruit weight per plant at each room's harvest (all 50 plants weighed). The line marks each room's average.</p>
+      <div class="tr-chart dash-skeleton" data-draw="chart-spread" data-source="plants" role="img" aria-label="Red fruit weight per plant at final harvest, by room"></div>
+    </section>
+  </div>
+
+  <section class="tr-card" id="climate">
+    <div class="tr-row">
+      <h2>What each room's climate looked like</h2>
+      <select class="dash-select" id="climate-metric" aria-label="Climate measure">
+        <option value="T_mean">Daily mean temperature (°C)</option>
+        <option value="gdd_cum">Degree-days since 3 Sep</option>
+        <option value="DLI">Light reaching plants (mol/m²/day)</option>
+        <option value="lamp_hours">Grow lamps on (hours/day)</option>
+        <option value="CO2_mean">CO₂ (ppm)</option>
+        <option value="RH_mean">Relative humidity (%)</option>
+        <option value="density">Plants per m²</option>
+      </select>
+    </div>
+    <p>Daily values from the 5-minute greenhouse log. The dashed line on temperature is the outside air.</p>
+    <div class="tr-chart dash-skeleton" data-draw="chart-climate" data-source="daily weather" role="img" aria-label="Daily climate per room"></div>
+  </section>
+
+  <section class="tr-card" id="canopy">
+    <h2>Plants grew about 30 cm, then sagged under fruit</h2>
+    <p>Typical distance from the overhead camera to the plants at noon, from the depth image. A smaller distance means a taller canopy.</p>
+    <div class="tr-chart dash-skeleton" data-draw="chart-canopy" data-source="images" role="img" aria-label="Distance from camera to canopy over the season per room"></div>
+  </section>
+
+  <details class="tr-notes" id="notes">
+    <summary>How these numbers were made, and their limits</summary>
+    <ul>
+      <li>% red by weight: red fruit weight ÷ all fruit weight per plant, averaged per room. Each check cut different plants, so no plant is followed through time.</li>
+      <li>At harvest, plants 31–50 were weighed for red fruit only, so % red at harvest uses plants 1–30 (1–21 for Reference).</li>
+      <li>Photo index: share of pixels that are strongly saturated red after white-balancing each photo. It sees only the top of the canopy and only part of one table, so it shows when ripening starts and how fast it moves within a room, not a room's exact % red.</li>
+      <li>Photos taken on or after harvest day show an empty table and are left out.</li>
+      <li>Degree-days use a 10 °C base, a common textbook value for tomato.</li>
+      <li>Profit: the challenge scored growers on net profit per m² per day. Pots under one-third red are unsellable; red fruit above 150 g per pot adds nothing; each plant costs €0.75 and each re-spacing €1.50/m². Costs to date come from the greenhouse log, future days at the last 7 days' cost rate. The €2.15 price per pot is backed out from the paper's published profits (implied €1.97–2.31 across rooms). Fruit dry matter, which also set the price, is not in the data. Profits computed at each actual harvest rank the rooms almost the same as the published results (rank correlation 0.93).</li>
+      <li>Forecast: % red follows an S-curve in degree-days. "Warmth only" uses one curve for all rooms; "warmth + photos" starts each room's curve from the day red first showed in its photos. Each room is forecast with curves fitted on the other five rooms only. Future warmth is assumed to continue at the last 7 days' rate. The range covers how much rooms differed from each other (95%).</li>
+      <li>Only 6 rooms and 4 measurement days each: patterns here are associations, not proof that one setting caused a result.</li>
+      <li>Data: Maree, Zhang, van Marrewijk, de Zwart, Bijlaard &amp; Hemming, 4th Autonomous Greenhouse Challenge dataset, 4TU.ResearchData, doi 10.4121/fa102772-32db-4b30-bace-12f2016722ce, licensed CC BY 4.0. Summaries derived for this page.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+// shared helpers and highlight state
+window.TR = (() => {
+  const TEAMS = ['reference', 'ideas', 'mugrow', 'trigger', 'agrifusion', 'tomatonuts'];
+  const NAME = {reference: 'Reference', ideas: 'IDEAS', mugrow: 'MuGrow', trigger: 'Trigger', agrifusion: 'Agrifusion', tomatonuts: 'Tomatonuts'};
+  const color = (t) => dash.colors[TEAMS.indexOf(t) % dash.colors.length];
+  const parse = d3.utcParse('%Y-%m-%d');
+  const fmtDate = d3.utcFormat('%-d %b');
+  const num = (v) => (v === null || v === '' || v === undefined ? NaN : +v);
+  const state = {hl: null};
+  const charts = ['chart-ripening', 'chart-warmth', 'chart-photos', 'chart-spread', 'chart-climate', 'chart-canopy'];
+  const opacity = (t) => (state.hl && state.hl !== t ? 0.12 : 1);
+
+  function ready(el, ids) {
+    const st = ids.map((id) => dash.data(id).status);
+    if (st.every((s) => s === 'ok')) { el.classList.remove('dash-skeleton'); return true; }
+    if (st.some((s) => s === 'loading')) { el.classList.add('dash-skeleton'); el.replaceChildren(); return false; }
+    el.classList.remove('dash-skeleton');
+    const f = document.createElement('div'); f.className = 'tr-fail';
+    f.textContent = st.some((s) => s === 'error' || s === 'missing') ? 'Failed to load' : '—';
+    el.replaceChildren(f);
+    return false;
+  }
+
+  // series: [{team, pts:[{x, y, hollow?, tip:[[k,v],...]}]}]
+  function lines(el, o) {
+    const W = Math.max(280, el.clientWidth), H = o.height || 270;
+    el.replaceChildren();
+    const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+    const all = o.series.flatMap((s) => s.pts).concat(o.extra ? o.extra.pts : []);
+    const xs = all.map((p) => p.x), ys = all.map((p) => p.y).filter((v) => isFinite(v));
+    const x = (o.xTime ? d3.scaleUtc() : d3.scaleLinear()).domain(o.xDomain || d3.extent(xs));
+    const yd = o.yDomain || [Math.min(0, d3.min(ys)), d3.max(ys) || 1];
+    const y = d3.scaleLinear().domain(yd).nice();
+    if (o.invertY) y.range([0, 1]); else y.range([1, 0]);
+    // measure left margin from widest tick label
+    const probe = svg.append('g').attr('class', 'axis');
+    const tickFmt = o.yFmt || d3.format(',~g');
+    let ml = 0;
+    y.ticks(5).forEach((t) => { const n = probe.append('text').text(tickFmt(t)); ml = Math.max(ml, n.node().getComputedTextLength()); });
+    probe.remove();
+    const m = {t: 10, r: 14, b: 38, l: Math.ceil(ml) + 12};
+    x.range([m.l, W - m.r]);
+    y.range(o.invertY ? [m.t, H - m.b] : [H - m.b, m.t]);
+    const nx = Math.max(2, Math.floor((W - m.l - m.r) / 80));
+    svg.append('g').attr('class', 'grid').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat(''));
+    svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(nx).tickFormat(o.xTime ? fmtDate : (o.xFmt || d3.format(',~g'))));
+    svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(tickFmt));
+    if (o.xLabel) svg.append('text').attr('class', 'axlabel').attr('x', W - m.r).attr('y', H - 4).attr('text-anchor', 'end').text(o.xLabel);
+    (o.refs || []).forEach((r) => {
+      svg.append('line').attr('class', 'ref').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(r.y)).attr('y2', y(r.y));
+      svg.append('text').attr('class', 'reftext').attr('x', W - m.r).attr('y', y(r.y) - 4).attr('text-anchor', 'end').text(r.label);
+    });
+    if (o.extra) {
+      svg.append('path').datum(o.extra.pts).attr('fill', 'none').attr('class', 'ref')
+        .attr('d', d3.line().defined((p) => isFinite(p.y)).x((p) => x(p.x)).y((p) => y(p.y)));
+    }
+    const order = o.series.slice().sort((a, b) => (a.team === state.hl) - (b.team === state.hl));
+    const g = svg.append('g');
+    order.forEach((s) => {
+      const c = color(s.team), op = opacity(s.team);
+      if (o.connect !== false) g.append('path').datum(s.pts).attr('fill', 'none').style('stroke', c).attr('stroke-width', state.hl === s.team ? 2.5 : 1.6).attr('opacity', op)
+        .attr('d', d3.line().defined((p) => isFinite(p.y)).x((p) => x(p.x)).y((p) => y(p.y)));
+      if (o.dots !== false) g.selectAll(null).data(s.pts.filter((p) => isFinite(p.y))).join('circle')
+        .attr('cx', (p) => x(p.x)).attr('cy', (p) => y(p.y)).attr('r', o.r || 3.2).attr('opacity', op)
+        .style('fill', (p) => (p.hollow ? 'var(--color-panel)' : c)).style('stroke', c).attr('stroke-width', 1.4);
+    });
+    // tooltip: nearest point
+    const tt = document.createElement('div'); tt.className = 'tr-tt'; tt.hidden = true; el.appendChild(tt);
+    const pts = o.series.flatMap((s) => s.pts.filter((p) => isFinite(p.y)).map((p) => ({...p, team: s.team})));
+    const hl = svg.append('circle').attr('r', 6).attr('fill', 'none').attr('stroke-width', 2).style('stroke', 'var(--color-fg)').attr('opacity', 0);
+    function show(ev) {
+      const [mx, my] = d3.pointer(ev, svg.node());
+      let best = null, bd = Infinity;
+      pts.forEach((p) => { if (state.hl && state.hl !== p.team) return; const d = (x(p.x) - mx) ** 2 + (y(p.y) - my) ** 2; if (d < bd) { bd = d; best = p; } });
+      if (!best || bd > 60 * 60) { tt.hidden = true; hl.attr('opacity', 0); return; }
+      hl.attr('cx', x(best.x)).attr('cy', y(best.y)).attr('opacity', 1);
+      const rows = [[NAME[best.team], '']].concat(best.tip || []);
+      tt.replaceChildren(...rows.map(([k, v], i) => { const d = document.createElement('div'); if (i === 0) { d.style.fontWeight = '600'; d.textContent = k; } else { const s = document.createElement('span'); s.className = 'k'; s.textContent = k + ' '; d.append(s, document.createTextNode(v)); } return d; }));
+      tt.hidden = false;
+      const bw = tt.offsetWidth, bh = tt.offsetHeight;
+      let lx = x(best.x) + 12, ly = y(best.y) - bh - 8;
+      if (lx + bw > W) lx = x(best.x) - bw - 12;
+      if (ly < 0) ly = y(best.y) + 12;
+      tt.style.left = Math.max(0, lx) + 'px'; tt.style.top = ly + 'px';
+    }
+    svg.on('pointermove', show).on('pointerdown', show).on('pointerleave', () => { tt.hidden = true; hl.attr('opacity', 0); });
+  }
+
+  function setHighlight(t) {
+    state.hl = state.hl === t ? null : t;
+    document.querySelectorAll('.tr-chip').forEach((b) => {
+      const on = b.dataset.team === state.hl;
+      b.classList.toggle('is-on', on);
+      b.classList.toggle('is-dim', !!state.hl && !on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    charts.forEach((c) => dash.draw(c));
+  }
+  return {TEAMS, NAME, color, parse, fmtDate, num, state, ready, lines, setHighlight};
+})();
+
+document.querySelectorAll('.tr-chip').forEach((b) => {
+  const sw = b.querySelector('.tr-sw');
+  if (sw) sw.style.background = TR.color(b.dataset.team);
+  b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => TR.setHighlight(b.dataset.team));
+});
+document.querySelectorAll('#climate-metric').forEach((s) => s.addEventListener('change', () => dash.draw('chart-climate')));
+</script>
+
+<script>
+// worked-out values
+dash.calc('rooms', {
+  title: 'Room summary',
+  description: 'One row per room: harvest day, % red on 5 Nov and at harvest, first red in photos, warmth and lamp use from 22 Oct.',
+  inputs: ['ripeness', 'images', 'daily'],
+  fn: (ripeness, images, daily) => {
+    const names = {reference: 'Reference', ideas: 'IDEAS', mugrow: 'MuGrow', trigger: 'Trigger', agrifusion: 'Agrifusion', tomatonuts: 'Tomatonuts'};
+    return Object.keys(names).map((team) => {
+      const r = ripeness.filter((d) => d.team === team);
+      const fin = r.find((d) => d.sample === 'final') || {};
+      const nov5 = r.find((d) => d.date === '2024-11-05') || {};
+      const img = images.filter((d) => d.team === team && d.date >= '2024-10-01').sort((a, b) => (a.date < b.date ? -1 : 1));
+      let first = null;
+      for (let i = 2; i < img.length; i++) {
+        if ([0, 1, 2].every((k) => +img[i - k].red_index > 0.1)) { first = img[i - 2].date; break; }
+      }
+      const late = daily.filter((d) => d.team === team && d.date >= '2024-10-22');
+      const mean = (a, f) => (a.length ? a.reduce((s, d) => s + +d[f], 0) / a.length : null);
+      return {
+        team, room: names[team], harvest: fin.date || null,
+        pct_red_nov5: nov5.pct_red_weight === undefined ? null : Math.round(+nov5.pct_red_weight * 10) / 10,
+        pct_red_final: fin.pct_red_weight === undefined ? null : Math.round(+fin.pct_red_weight * 10) / 10,
+        first_red_photo: first,
+        gdd_harvest: fin.gdd_cum === undefined ? null : Math.round(+fin.gdd_cum),
+        t_late: late.length ? Math.round(mean(late, 'T_mean') * 10) / 10 : null,
+        lamp_h_late: late.length ? Math.round(mean(late, 'lamp_hours') * 10) / 10 : null,
+      };
+    });
+  },
+});
+
+dash.calc('headline', {
+  title: 'Headline figures',
+  description: 'The room whose photos showed red fruit first, and the rooms most and least red by weight on 5 Nov.',
+  inputs: ['rooms'],
+  fn: (rooms) => {
+    if (!rooms || !rooms.length) return [];
+    const withFirst = rooms.filter((r) => r.first_red_photo).sort((a, b) => (a.first_red_photo < b.first_red_photo ? -1 : 1));
+    const byNov = rooms.filter((r) => r.pct_red_nov5 !== null).sort((a, b) => b.pct_red_nov5 - a.pct_red_nov5);
+    return [{
+      first_room: withFirst[0] ? withFirst[0].room : null,
+      first_date: withFirst[0] ? withFirst[0].first_red_photo : null,
+      fast_room: byNov[0].room, fast_pct: byNov[0].pct_red_nov5,
+      slow_room: byNov[byNov.length - 1].room, slow_pct: byNov[byNov.length - 1].pct_red_nov5,
+    }];
+  },
+});
+</script>
+
+<script>
+// headline words
+const H = (field, fmt) => (el) => {
+  const h = dash.data('headline');
+  if (h.status !== 'ok' || !h.data || !h.data.length || h.data[0][field] === null) { el.textContent = '—'; return; }
+  el.textContent = fmt ? fmt(h.data[0][field]) : h.data[0][field];
+};
+dash.draw('first-room', H('first_room'));
+dash.draw('first-date', H('first_date', (v) => TR.fmtDate(TR.parse(v))));
+dash.draw('fast-room', H('fast_room'));
+dash.draw('fast-pct', H('fast_pct', d3.format('.1f')));
+dash.draw('slow-room', H('slow_room'));
+dash.draw('slow-pct', H('slow_pct', d3.format('.1f')));
+
+dash.draw('rooms-body', (tb) => {
+  const r = dash.data('rooms');
+  if (r.status !== 'ok' || !r.data) { tb.replaceChildren(); return; }
+  const f1 = d3.format('.1f'), f0 = d3.format(',.0f');
+  const dt = (v) => (v ? TR.fmtDate(TR.parse(v)) : '—');
+  tb.replaceChildren(...r.data.map((d) => {
+    const tr = document.createElement('tr');
+    tr.dataset.key = d.team;
+    const cells = [d.room, dt(d.harvest), d.pct_red_nov5 === null ? '—' : f1(d.pct_red_nov5), d.pct_red_final === null ? '—' : f1(d.pct_red_final),
+      dt(d.first_red_photo), d.gdd_harvest === null ? '—' : f0(d.gdd_harvest), d.t_late === null ? '—' : f1(d.t_late), d.lamp_h_late === null ? '—' : f1(d.lamp_h_late)];
+    cells.forEach((c, i) => {
+      const td = document.createElement('td');
+      if (i === 0) { const sw = document.createElement('span'); sw.className = 'tr-sw'; sw.style.background = TR.color(d.team); sw.style.marginRight = '6px'; td.append(sw); }
+      td.append(document.createTextNode(c));
+      tr.append(td);
+    });
+    return tr;
+  }));
+});
+</script>
+
+<script>
+// charts
+const N = TR.num, P = TR.parse;
+const pct = d3.format('.1f');
+
+dash.draw('chart-ripening', (el) => {
+  if (!TR.ready(el, ['ripeness'])) return;
+  const rows = dash.data('ripeness').data;
+  TR.lines(el, {
+    xTime: true, yDomain: [0, 100], yFmt: (v) => v + '%',
+    series: TR.TEAMS.map((t) => ({team: t, pts: rows.filter((r) => r.team === t).map((r) => ({
+      x: P(r.date), y: N(r.pct_red_weight),
+      tip: [['Date', TR.fmtDate(P(r.date))], ['Red by weight', pct(N(r.pct_red_weight)) + '%'], ['Plants', String(N(r.plants_full))], ['Red fruit / plant', d3.format('.0f')(N(r.fw_red)) + ' g']],
+    })).sort((a, b) => a.x - b.x)})),
+  });
+});
+
+dash.draw('chart-warmth', (el) => {
+  if (!TR.ready(el, ['ripeness'])) return;
+  const rows = dash.data('ripeness').data;
+  TR.lines(el, {
+    yDomain: [0, 100], yFmt: (v) => v + '%', xLabel: 'degree-days since 3 Sep (base 10 °C)',
+    series: TR.TEAMS.map((t) => ({team: t, pts: rows.filter((r) => r.team === t).map((r) => ({
+      x: N(r.gdd_cum), y: N(r.pct_red_weight),
+      tip: [['Date', TR.fmtDate(P(r.date))], ['Degree-days', d3.format(',.0f')(N(r.gdd_cum))], ['Red by weight', pct(N(r.pct_red_weight)) + '%']],
+    })).sort((a, b) => a.x - b.x)})),
+  });
+});
+
+dash.draw('chart-photos', (el) => {
+  if (!TR.ready(el, ['images'])) return;
+  const rows = dash.data('images').data.filter((r) => r.date >= '2024-10-15');
+  TR.lines(el, {
+    xTime: true, yFmt: (v) => v + '%', r: 2.8,
+    series: TR.TEAMS.map((t) => ({team: t, pts: rows.filter((r) => r.team === t).map((r) => ({
+      x: P(r.date), y: N(r.red_index), hollow: r.lamps_on_noon === 'True' || r.lamps_on_noon === true,
+      tip: [['Date', TR.fmtDate(P(r.date))], ['Red fruit in photo', d3.format('.2f')(N(r.red_index)) + '%'], ['Lamps at noon', (r.lamps_on_noon === 'True' || r.lamps_on_noon === true) ? 'on' : 'off']],
+    })).sort((a, b) => a.x - b.x)})),
+  });
+});
+
+dash.draw('chart-spread', (el) => {
+  if (!TR.ready(el, ['plants'])) return;
+  const rows = dash.data('plants').data.filter((r) => r.sample === 'final' && isFinite(N(r.fw_red)));
+  const W = Math.max(280, el.clientWidth), H = 270;
+  el.replaceChildren();
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+  const m = {t: 10, r: 10, b: 30, l: 44};
+  const x = d3.scaleBand().domain(TR.TEAMS).range([m.l, W - m.r]).padding(0.25);
+  const y = d3.scaleLinear().domain([0, d3.max(rows, (r) => N(r.fw_red))]).nice().range([H - m.b, m.t]);
+  svg.append('g').attr('class', 'grid').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat(''));
+  const xa = svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickFormat((t) => TR.NAME[t]));
+  if (x.bandwidth() < 62) xa.selectAll('text').text((t) => TR.NAME[t].slice(0, 4));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((v) => v + ' g'));
+  const rng = (s) => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 997; return h / 997; };
+  const tt = document.createElement('div'); tt.className = 'tr-tt'; tt.hidden = true; el.appendChild(tt);
+  TR.TEAMS.forEach((t) => {
+    const d = rows.filter((r) => r.team === t), c = TR.color(t), op = (TR.state.hl && TR.state.hl !== t) ? 0.12 : 1;
+    const mean = d3.mean(d, (r) => N(r.fw_red));
+    svg.append('g').selectAll('circle').data(d).join('circle')
+      .attr('cx', (r) => x(t) + x.bandwidth() * (0.15 + 0.7 * rng(r.plant))).attr('cy', (r) => y(N(r.fw_red))).attr('r', 3)
+      .attr('opacity', op * 0.8).style('fill', c)
+      .on('pointerenter pointerdown', (ev, r) => {
+        tt.replaceChildren(...[[TR.NAME[t] + ', plant ' + r.plant.split('-')[1]], ['Red fruit', d3.format('.0f')(N(r.fw_red)) + ' g']].map(([k, v]) => { const e = document.createElement('div'); if (v === undefined) { e.style.fontWeight = '600'; e.textContent = k; } else { const s = document.createElement('span'); s.className = 'k'; s.textContent = k + ' '; e.append(s, document.createTextNode(v)); } return e; }));
+        tt.hidden = false;
+        const cx = +ev.target.getAttribute('cx'), cy = +ev.target.getAttribute('cy');
+        const lx = cx + 10 + tt.offsetWidth > W ? cx - tt.offsetWidth - 10 : cx + 10;
+        tt.style.left = Math.max(0, lx) + 'px'; tt.style.top = Math.max(0, cy - tt.offsetHeight - 6) + 'px';
+      })
+      .on('pointerleave', () => { tt.hidden = true; });
+    if (isFinite(mean)) svg.append('line').attr('x1', x(t)).attr('x2', x(t) + x.bandwidth()).attr('y1', y(mean)).attr('y2', y(mean))
+      .style('stroke', 'var(--color-fg)').attr('stroke-width', 2).attr('opacity', op);
+  });
+});
+
+dash.draw('chart-climate', (el) => {
+  if (!TR.ready(el, ['daily', 'weather'])) return;
+  const sel = document.getElementById('climate-metric');
+  const f = sel ? sel.value : 'T_mean';
+  const units = {T_mean: ' °C', gdd_cum: '', DLI: ' mol/m²', lamp_hours: ' h', CO2_mean: ' ppm', RH_mean: '%', density: ' /m²'};
+  const fmt = f === 'CO2_mean' || f === 'gdd_cum' ? d3.format(',.0f') : d3.format('.1f');
+  const rows = dash.data('daily').data;
+  const w = dash.data('weather').data;
+  TR.lines(el, {
+    xTime: true, dots: false, yFmt: d3.format(',~g'),
+    yDomain: f === 'T_mean' ? [0, 28] : undefined,
+    extra: f === 'T_mean' ? {pts: w.map((r) => ({x: P(r.date), y: N(r.T_out)}))} : null,
+    refs: f === 'T_mean' ? [] : [],
+    series: TR.TEAMS.map((t) => ({team: t, pts: rows.filter((r) => r.team === t).map((r) => ({
+      x: P(r.date), y: N(r[f]), tip: [['Date', TR.fmtDate(P(r.date))], [sel ? sel.selectedOptions[0].textContent.replace(/ \(.*\)/, '') : f, fmt(N(r[f])) + units[f]]],
+    })).sort((a, b) => a.x - b.x)})),
+  });
+});
+
+dash.draw('chart-canopy', (el) => {
+  if (!TR.ready(el, ['images'])) return;
+  const rows = dash.data('images').data;
+  const ext = d3.extent(rows, (r) => N(r.canopy_distance_mm));
+  TR.lines(el, {
+    xTime: true, dots: false, invertY: true, yFmt: (v) => d3.format('.2f')(v / 1000) + ' m',
+    yDomain: [ext[0] - 20, ext[1] + 20],
+    series: TR.TEAMS.map((t) => ({team: t, pts: rows.filter((r) => r.team === t).map((r) => ({
+      x: P(r.date), y: N(r.canopy_distance_mm),
+      tip: [['Date', TR.fmtDate(P(r.date))], ['Camera to canopy', d3.format('.2f')(N(r.canopy_distance_mm) / 1000) + ' m']],
+    })).sort((a, b) => a.x - b.x)})),
+  });
+});
+</script>
+
+<script>
+// forecast section
+window.FC = {room: 'trigger', day: '2024-11-06'};
+const FCM = {A: 'warmth only', B: 'warmth + photos'};
+function fcRows() {
+  const f = dash.data('fcdaily');
+  return f.status === 'ok' ? f.data.filter((r) => r.team === FC.room).sort((a, b) => (a.date < b.date ? -1 : 1)) : [];
+}
+document.querySelectorAll('#fc-room').forEach((s) => {
+  s.value = FC.room;
+  s.addEventListener('change', () => { FC.room = s.value; FC.day = '2024-11-06'; ['fc-day', 'fc-summary', 'chart-forecast', 'profit-summary', 'chart-profit'].forEach((n) => dash.draw(n)); });
+});
+
+dash.draw('fc-day', (el) => {
+  const rows = fcRows();
+  if (!rows.length) { el.replaceChildren(); return; }
+  if (!rows.some((r) => r.date === FC.day)) FC.day = rows[Math.min(rows.length - 1, Math.max(0, rows.findIndex((r) => r.date >= '2024-11-06')))].date;
+  const lab = document.createElement('label'); lab.htmlFor = 'fc-slider'; lab.textContent = 'Day';
+  const inp = document.createElement('input'); inp.type = 'range'; inp.id = 'fc-slider'; inp.min = 0; inp.max = rows.length - 1; inp.step = 1;
+  inp.value = rows.findIndex((r) => r.date === FC.day);
+  inp.setAttribute('aria-label', 'Forecast day');
+  const out = document.createElement('output'); out.htmlFor = 'fc-slider'; out.textContent = TR.fmtDate(TR.parse(FC.day));
+  inp.addEventListener('input', () => {
+    FC.day = rows[+inp.value].date; out.textContent = TR.fmtDate(TR.parse(FC.day));
+    dash.draw('fc-summary'); dash.draw('chart-forecast'); dash.draw('profit-summary'); dash.draw('chart-profit');
+  });
+  el.replaceChildren(lab, inp, out);
+});
+
+dash.draw('fc-summary', (el) => {
+  const rows = fcRows(), w = dash.data('windows');
+  const r = rows.find((x) => x.date === FC.day);
+  const win = w.status === 'ok' ? w.data.find((x) => x.team === FC.room) : null;
+  if (!r || !win) { el.textContent = '—'; return; }
+  const where = `team=${encodeURIComponent(r.team)}&date=${encodeURIComponent(r.date)}`;
+  const mk = (src, field, text, wh) => { const b = document.createElement('b'); b.dataset.source = src; b.dataset.field = field; b.dataset.where = wh; b.textContent = text; return b; };
+  const t = (s) => document.createTextNode(s);
+  const dt = (v) => TR.fmtDate(TR.parse(v));
+  const passed = r.target_date < r.date;
+  const wwin = `team=${encodeURIComponent(win.team)}`;
+  el.replaceChildren(
+    t(`On ${dt(r.date)}, ${TR.NAME[r.team]} was estimated at `), mk('fcdaily', 'pct_red_now', d3.format('.1f')(r.pct_red_now), where),
+    t('% red (likely '), mk('fcdaily', 'pct_red_low', d3.format('.1f')(r.pct_red_low), where), t('–'), mk('fcdaily', 'pct_red_high', d3.format('.1f')(r.pct_red_high), where),
+    t(`%), from ${FCM[r.model]}. `),
+    t(passed ? 'It had already passed 70% red around ' : 'It should reach 70% red on '), mk('fcdaily', 'target_date', dt(r.target_date), where),
+    t(' (between '), mk('fcdaily', 'target_early', dt(r.target_early), where), t(' and '), mk('fcdaily', 'target_late', dt(r.target_late), where),
+    t('). The grower actually harvested on '), mk('windows', 'actual_harvest', dt(win.actual_harvest), wwin),
+    t(', when fruit measured '), mk('windows', 'measured_pct_at_harvest', d3.format('.1f')(win.measured_pct_at_harvest), wwin), t('% red.'),
+  );
+});
+
+dash.draw('chart-forecast', (el) => {
+  if (!TR.ready(el, ['fcdaily', 'ripeness', 'windows'])) return;
+  const rows = fcRows().map((r) => ({...r, x: TR.parse(r.date)}));
+  const meas = dash.data('ripeness').data.filter((r) => r.team === FC.room && r.date >= '2024-10-15').map((r) => ({x: TR.parse(r.date), y: +r.pct_red_weight, date: r.date}));
+  const win = dash.data('windows').data.find((x) => x.team === FC.room);
+  const cur = rows.find((r) => r.date === FC.day);
+  if (!rows.length || !cur || !win) { el.textContent = '—'; return; }
+  const W = Math.max(280, el.clientWidth), H = 300, m = {t: 18, r: 16, b: 34, l: 44};
+  const c = TR.color(FC.room);
+  const xmax = d3.max([rows[rows.length - 1].x, TR.parse(cur.target_late), TR.parse(win.actual_harvest)]);
+  const x = d3.scaleUtc().domain([rows[0].x, d3.utcDay.offset(xmax, 1)]).range([m.l, W - m.r]);
+  const y = d3.scaleLinear().domain([0, 100]).range([H - m.b, m.t]);
+  el.replaceChildren();
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+  svg.append('g').attr('class', 'grid').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat(''));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor((W - m.l - m.r) / 80))).tickFormat(TR.fmtDate));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((v) => v + '%'));
+  svg.append('line').attr('class', 'ref').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(70)).attr('y2', y(70));
+  svg.append('text').attr('class', 'reftext').attr('x', m.l + 4).attr('y', y(70) - 4).text('target 70%');
+  svg.append('path').datum(rows).attr('class', 'band').style('fill', c)
+    .attr('d', d3.area().x((r) => x(r.x)).y0((r) => y(r.pct_red_low)).y1((r) => y(r.pct_red_high)));
+  svg.append('path').datum(rows).attr('fill', 'none').style('stroke', c).attr('stroke-width', 2)
+    .attr('d', d3.line().x((r) => x(r.x)).y((r) => y(r.pct_red_now)));
+  const vline = (d, label, anchor) => {
+    const xx = x(TR.parse(d));
+    svg.append('line').attr('class', 'marker').attr('x1', xx).attr('x2', xx).attr('y1', m.t).attr('y2', H - m.b);
+    svg.append('text').attr('class', 'marktext').attr('x', xx + (anchor === 'end' ? -4 : 4)).attr('y', m.t - 4).attr('text-anchor', anchor).text(label);
+  };
+  const dayX = x(cur.x), harvX = x(TR.parse(win.actual_harvest));
+  const near = Math.abs(dayX - harvX) < 70;
+  vline(cur.date, 'this day', near && dayX < harvX ? 'end' : 'start');
+  vline(win.actual_harvest, 'actual harvest', near && harvX <= dayX ? 'end' : (harvX > W - 110 ? 'end' : 'start'));
+  // forecast date for 70% with its range
+  svg.append('line').attr('x1', x(TR.parse(cur.target_early))).attr('x2', x(TR.parse(cur.target_late))).attr('y1', y(70)).attr('y2', y(70))
+    .style('stroke', c).attr('stroke-width', 5).attr('stroke-linecap', 'round').attr('opacity', 0.55);
+  svg.append('circle').attr('cx', x(TR.parse(cur.target_date))).attr('cy', y(70)).attr('r', 5).style('fill', c).style('stroke', 'var(--color-panel)').attr('stroke-width', 1.5);
+  svg.append('circle').attr('cx', dayX).attr('cy', y(cur.pct_red_now)).attr('r', 4.5).style('fill', c).style('stroke', 'var(--color-panel)').attr('stroke-width', 1.5);
+  svg.selectAll(null).data(meas).join('rect').attr('x', (p) => x(p.x) - 4).attr('y', (p) => y(p.y) - 4).attr('width', 8).attr('height', 8)
+    .style('fill', 'var(--color-fg)');
+  // tooltip on the estimate line and measured points
+  const tt = document.createElement('div'); tt.className = 'tr-tt'; tt.hidden = true; el.appendChild(tt);
+  const pts = rows.map((r) => ({px: x(r.x), py: y(r.pct_red_now), lines: [[TR.fmtDate(r.x)], ['Estimate', d3.format('.1f')(r.pct_red_now) + '%'], ['Range', d3.format('.0f')(r.pct_red_low) + '–' + d3.format('.0f')(r.pct_red_high) + '%'], ['Model', FCM[r.model]]]}))
+    .concat(meas.map((p) => ({px: x(p.x), py: y(p.y), lines: [[TR.fmtDate(p.x) + ', measured'], ['Red by weight', d3.format('.1f')(p.y) + '%']]})))
+    .concat([{px: x(TR.parse(cur.target_date)), py: y(70), lines: [['70% red forecast'], ['Date', TR.fmtDate(TR.parse(cur.target_date))], ['Range', TR.fmtDate(TR.parse(cur.target_early)) + ' – ' + TR.fmtDate(TR.parse(cur.target_late))]]}]);
+  const show = (ev) => {
+    const [mx, my] = d3.pointer(ev, svg.node());
+    const best = d3.least(pts, (p) => (p.px - mx) ** 2 + (p.py - my) ** 2);
+    if (!best || (best.px - mx) ** 2 + (best.py - my) ** 2 > 50 * 50) { tt.hidden = true; return; }
+    tt.replaceChildren(...best.lines.map(([k, v], i) => { const d = document.createElement('div'); if (v === undefined) { d.style.fontWeight = '600'; d.textContent = k; } else { const s = document.createElement('span'); s.className = 'k'; s.textContent = k + ' '; d.append(s, document.createTextNode(v)); } return d; }));
+    tt.hidden = false;
+    const lx = best.px + 12 + tt.offsetWidth > W ? best.px - tt.offsetWidth - 12 : best.px + 12;
+    tt.style.left = Math.max(0, lx) + 'px'; tt.style.top = Math.max(0, best.py - tt.offsetHeight - 8) + 'px';
+  };
+  svg.on('pointermove', show).on('pointerdown', show).on('pointerleave', () => { tt.hidden = true; });
+  svg.append('text').attr('class', 'axlabel').attr('x', W - m.r).attr('y', H - 4).attr('text-anchor', 'end').text('line: estimate · band: likely range · squares: measured');
+});
+
+dash.draw('fc-windows-body', (tb) => {
+  const w = dash.data('windows');
+  if (w.status !== 'ok') { tb.replaceChildren(); return; }
+  const dt = (v) => TR.fmtDate(TR.parse(v));
+  tb.replaceChildren(...TR.TEAMS.map((t) => w.data.find((r) => r.team === t)).filter(Boolean).map((r) => {
+    const tr = document.createElement('tr'); tr.dataset.key = encodeURIComponent(r.team);
+    [TR.NAME[r.team], dt(r.forecast_date), dt(r.window_start), dt(r.window_end), dt(r.actual_harvest), d3.format('.1f')(r.measured_pct_at_harvest), d3.format('+d')(r.days_late_vs_forecast)]
+      .forEach((v, i) => { const td = document.createElement('td'); if (i === 0) { const sw = document.createElement('span'); sw.className = 'tr-sw'; sw.style.background = TR.color(r.team); sw.style.marginRight = '6px'; td.append(sw); } td.append(document.createTextNode(v)); tr.append(td); });
+    return tr;
+  }));
+});
+
+dash.draw('fc-eval-body', (tb) => {
+  const e = dash.data('evaluation');
+  if (e.status !== 'ok') { tb.replaceChildren(); return; }
+  tb.replaceChildren(...e.data.map((r) => {
+    const tr = document.createElement('tr'); tr.dataset.key = encodeURIComponent(r.test) + ',' + encodeURIComponent(r.model);
+    [r.test, r.model, d3.format('.1f')(r.mae), String(r.n)].forEach((v) => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+    return tr;
+  }));
+});
+</script>
+
+<script>
+// profit by harvest day
+const PRF = d3.format('.2f');
+function profitRows() {
+  const p = dash.data('profit');
+  return p.status === 'ok' ? p.data.filter((r) => r.team === FC.room && r.decided_on === FC.day).sort((a, b) => (a.harvest_on < b.harvest_on ? -1 : 1)) : [];
+}
+function bestRow() {
+  const b = dash.data('best');
+  return b.status === 'ok' ? b.data.find((r) => r.team === FC.room && r.decided_on === FC.day) : null;
+}
+
+dash.draw('profit-summary', (el) => {
+  const b = bestRow();
+  if (!b) {
+    el.textContent = FC.day < '2024-11-05' ? 'The profit forecast starts on 5 Nov, the first weighing with red fruit, which gives each room its fruit weight per plant. Slide to 5 Nov or later.' : '—';
+    return;
+  }
+  const dt = (v) => TR.fmtDate(TR.parse(v));
+  const wh = `team=${encodeURIComponent(b.team)}&decided_on=${encodeURIComponent(b.decided_on)}`;
+  const mk = (field, text) => { const s = document.createElement('b'); s.dataset.source = 'best'; s.dataset.field = field; s.dataset.where = wh; s.textContent = text; return s; };
+  const t = (s) => document.createTextNode(s);
+  const parts = [t(`Forecast on ${dt(b.decided_on)}: harvest ${TR.NAME[b.team]} on `), mk('best_day', dt(b.best_day)),
+    t(' (likely between '), mk('best_day_early', dt(b.best_day_early)), t(' and '), mk('best_day_late', dt(b.best_day_late)),
+    t('), when fruit should be about '), mk('best_pct_red', d3.format('.1f')(b.best_pct_red)), t('% red, for an expected €'),
+    mk('best_profit_m2_day', PRF(b.best_profit_m2_day)), t(' per m² per day.')];
+  if (b.profit_at_actual !== null && b.profit_at_actual !== undefined) {
+    parts.push(t(` Harvesting on ${dt(b.actual_harvest)}, as the grower did, gives €`), mk('profit_at_actual', PRF(b.profit_at_actual)),
+      t(b.gain_pct > 0.5 ? ', so the forecast day earns ' : '.'));
+    if (b.gain_pct > 0.5) parts.push(mk('gain_pct', d3.format('.1f')(b.gain_pct)), t('% more.'));
+  }
+  el.replaceChildren(...parts);
+});
+
+dash.draw('chart-profit', (el) => {
+  if (!TR.ready(el, ['profit', 'best'])) return;
+  const rows = profitRows().map((r) => ({...r, x: TR.parse(r.harvest_on)}));
+  const b = bestRow();
+  if (!rows.length || !b) {
+    el.replaceChildren();
+    const f = document.createElement('div'); f.className = 'tr-fail';
+    f.textContent = 'Profit forecast is available from 5 Nov onward.';
+    el.appendChild(f);
+    return;
+  }
+  const W = Math.max(280, el.clientWidth), H = 280, m = {t: 18, r: 16, b: 34, l: 52};
+  const c = TR.color(FC.room);
+  const lo = (r) => Math.min(r.profit_m2_day_early, r.profit_m2_day_late, r.profit_m2_day);
+  const hi = (r) => Math.max(r.profit_m2_day_early, r.profit_m2_day_late, r.profit_m2_day);
+  const x = d3.scaleUtc().domain(d3.extent(rows, (r) => r.x)).range([m.l, W - m.r]);
+  const y = d3.scaleLinear().domain([Math.min(0, d3.min(rows, lo)), Math.max(0.05, d3.max(rows, hi))]).nice().range([H - m.b, m.t]);
+  el.replaceChildren();
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+  svg.append('g').attr('class', 'grid').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat(''));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor((W - m.l - m.r) / 80))).tickFormat(TR.fmtDate));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((v) => '€' + d3.format('.2f')(v)));
+  svg.append('line').attr('class', 'ref').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0));
+  svg.append('text').attr('class', 'reftext').attr('x', m.l + 4).attr('y', y(0) - 4).text('break-even');
+  svg.append('path').datum(rows).attr('class', 'band').style('fill', c).attr('d', d3.area().x((r) => r.x && x(r.x)).y0((r) => y(lo(r))).y1((r) => y(hi(r))));
+  svg.append('path').datum(rows).attr('fill', 'none').style('stroke', c).attr('stroke-width', 2).attr('d', d3.line().x((r) => x(r.x)).y((r) => y(r.profit_m2_day)));
+  const harv = TR.parse(b.actual_harvest);
+  if (harv >= rows[0].x && harv <= rows[rows.length - 1].x) {
+    const hx = x(harv);
+    svg.append('line').attr('class', 'marker').attr('x1', hx).attr('x2', hx).attr('y1', m.t).attr('y2', H - m.b);
+    svg.append('text').attr('class', 'marktext').attr('x', hx > W - 110 ? hx - 4 : hx + 4).attr('y', m.t - 4).attr('text-anchor', hx > W - 110 ? 'end' : 'start').text('actual harvest');
+  }
+  const bx = x(TR.parse(b.best_day)), by = y(b.best_profit_m2_day);
+  svg.append('line').attr('x1', x(TR.parse(b.best_day_early))).attr('x2', x(TR.parse(b.best_day_late))).attr('y1', by).attr('y2', by)
+    .style('stroke', c).attr('stroke-width', 5).attr('stroke-linecap', 'round').attr('opacity', 0.45);
+  svg.append('circle').attr('cx', bx).attr('cy', by).attr('r', 5.5).style('fill', c).style('stroke', 'var(--color-panel)').attr('stroke-width', 1.5);
+  svg.append('text').attr('class', 'marktext').attr('x', bx).attr('y', by - 10).attr('text-anchor', bx > W - 60 ? 'end' : 'middle').text('best day');
+  const tt = document.createElement('div'); tt.className = 'tr-tt'; tt.hidden = true; el.appendChild(tt);
+  const show = (ev) => {
+    const [mx] = d3.pointer(ev, svg.node());
+    const r = d3.least(rows, (q) => Math.abs(x(q.x) - mx));
+    if (!r) return;
+    const lines = [[`Harvest ${TR.fmtDate(r.x)}`], ['Profit', '€' + PRF(r.profit_m2_day) + ' /m²/day'], ['Likely range', '€' + PRF(lo(r)) + ' to €' + PRF(hi(r))],
+      ['Fruit red', d3.format('.0f')(r.pct_red) + '%'], ['Red fruit / pot', d3.format('.0f')(r.red_g) + ' g'], ['Pots sellable', d3.format('.0%')(r.sellable_share)]];
+    tt.replaceChildren(...lines.map(([k, v]) => { const d = document.createElement('div'); if (v === undefined) { d.style.fontWeight = '600'; d.textContent = k; } else { const s = document.createElement('span'); s.className = 'k'; s.textContent = k + ' '; d.append(s, document.createTextNode(v)); } return d; }));
+    tt.hidden = false;
+    const px = x(r.x), py = y(r.profit_m2_day);
+    const lx = px + 12 + tt.offsetWidth > W ? px - tt.offsetWidth - 12 : px + 12;
+    tt.style.left = Math.max(0, lx) + 'px'; tt.style.top = Math.max(0, Math.min(H - tt.offsetHeight, py - tt.offsetHeight / 2)) + 'px';
+  };
+  svg.on('pointermove', show).on('pointerdown', show).on('pointerleave', () => { tt.hidden = true; });
+});
+
+dash.draw('best-body', (tb) => {
+  const b = dash.data('best');
+  if (b.status !== 'ok') { tb.replaceChildren(); return; }
+  const dt = (v) => TR.fmtDate(TR.parse(v));
+  tb.replaceChildren(...TR.TEAMS.map((t) => b.data.find((r) => r.team === t && r.decided_on === '2024-11-06')).filter(Boolean).map((r) => {
+    const tr = document.createElement('tr'); tr.dataset.key = encodeURIComponent(r.team) + ',' + encodeURIComponent(r.decided_on);
+    [TR.NAME[r.team], dt(r.best_day), dt(r.best_day_early), dt(r.best_day_late), d3.format('.1f')(r.best_pct_red), PRF(r.best_profit_m2_day),
+      dt(r.actual_harvest), r.profit_at_actual === null ? '—' : PRF(r.profit_at_actual), r.gain_pct === null ? '—' : d3.format('.1f')(r.gain_pct)]
+      .forEach((v, i) => { const td = document.createElement('td'); if (i === 0) { const sw = document.createElement('span'); sw.className = 'tr-sw'; sw.style.background = TR.color(r.team); sw.style.marginRight = '6px'; td.append(sw); } td.append(document.createTextNode(v)); tr.append(td); });
+    return tr;
+  }));
+});
+</script>

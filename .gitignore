@@ -1,8 +1,12 @@
-out/thumbs/
-__pycache__/
 .DS_Store
-*.zip
+__pycache__/
+*.py[cod]
 .venv/
 .pytest_cache/
 .claude/
-build/
+.env
+.env.local
+.streamlit/secrets.toml
+/data/agc4/images_noon/
+/data/agc4/image_sample/*.png
+/data/agc4/image_sample/previews/

@@ -13,4 +13,5 @@ if (!existsSync(src)) {
 }
 rmSync(dst, { recursive: true, force: true });
 cpSync(src, dst, { recursive: true });
+cpSync(resolve(src, '../../out/dash/plants.csv'), resolve(dst, 'plants.csv'));
 console.log(`sync-data: copied ${src} -> ${dst}`);

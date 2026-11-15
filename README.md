@@ -1,116 +1,78 @@
-# Dwarf tomato harvest forecast
+# Harvest Window
 
-When should a greenhouse grower harvest a dwarf tomato crop to earn the most?
+**When should a grower harvest a room of dwarf tomatoes?** The whole pot is sold in one harvest. Picking early leaves green pots that cannot be sold. Waiting brings more fruit into saleable condition, but also adds another day of heat, lighting and greenhouse occupancy. Harvest Window estimates what that extra day is worth.
 
-Built for the Precision & Digital Agriculture Hackathon (University of Illinois Urbana-Champaign, Nov 2026),
-Track 1 — Plant & Controlled Environment Systems, Challenge 2: forecast greenhouse crop performance.
+Team Root Access built this decision tool for the **2026 Precision & Digital Agriculture Hackathon**, Track 1, Challenge 2. The demo replays six greenhouse compartments from Wageningen’s 2024 Autonomous Greenhouse Challenge. A grower can compare harvest dates, inspect the weighed pots and camera images behind a forecast, and plan a shipment against a buyer’s deadline.
 
-## Problem
+![MuGrow harvest outlook on November 5. The profit curve peaks on November 7 while the red share of fruit continues to rise.](docs/images/mugrow-harvest.png)
 
-Dwarf tomatoes are harvested once, as whole potted plants, so the grower picks one harvest day.
-Too early and too many pots are still green and can't be sold; too late and the crop keeps paying for
-lamps, heating and greenhouse space while earning nothing more. Growers judge this by eye. In the
-4th Autonomous Greenhouse Challenge, all six growers (five AI controllers and one expert team)
-harvested later than the economic optimum.
+## One room, one decision
 
-This project forecasts, for each greenhouse room and each day:
+On **November 5**, the MuGrow sample put the room at about **55% red fruit by weight**. The model recommended harvesting on **November 7**, with November 8 still within 10% of peak forecast profit. Moving the date slider shows why. By November 11 the fruit is redder, but the model already expects every pot to meet the sale threshold on November 7.
 
-- how ripe the crop is now (% of fruit weight that is red), with a likely range
-- when it will reach a target ripeness (default 70% red)
-- which harvest day gives the highest expected profit per m² per day
+| Candidate day | Forecast red fruit by weight | Estimated saleable pots | Forecast net profit per m² per growing day |
+| --- | ---: | ---: | ---: |
+| Nov 5 | 55% | 95% | €0.103 |
+| **Nov 7** | **64%** | **100%** | **€0.131** |
+| Nov 8 | 68% | 100% | €0.124 |
+| Nov 11 | 79% | 100% | €0.103 |
 
-## Data
+The **near-peak window** answers a scheduling question under the central forecast. Ripening uncertainty is wider. Under the model’s early and late ripening scenarios, MuGrow’s best day ranges from November 5 to 13. A fresh weighing helps a grower decide whether to act on the central estimate. [Published daily recommendations](dwarf-tomato-harvest-forecast/app/data/days.json) · [Daily forecast values](dwarf-tomato-harvest-forecast/app/data/forecast.json)
 
-[4th Autonomous Greenhouse Challenge: Dwarf Tomato Timeseries and Images](https://doi.org/10.4121/fa102772-32db-4b30-bace-12f2016722ce)
-(Maree, Zhang, van Marrewijk, de Zwart, Bijlaard & Hemming, 4TU.ResearchData, CC BY 4.0).
-Six identical compartments at WUR Bleiswijk (NL), Sep–Nov 2024, each run by a different grower.
+## How the model picks a harvest day
 
-| Source | Used for |
-|---|---|
-| Climate, control and energy log, every 5 min, per room | Temperature (degree-days), light, lamp state, costs, plant density |
-| Outside weather | Context |
-| Hand harvest sheet (7 Oct, 22 Oct, 5 Nov, final) | Ground-truth % red, fruit weight, plant-to-plant spread |
-| Overhead RGB-D camera, 12:00 photo per room per day (464 photos) | Day red fruit first appears, red-fruit index, canopy height |
+1. **Estimate how fast the fruit is ripening.** The model accumulates warmth above 10 °C and fits an S-shaped ripening curve using the other rooms. Three consecutive noon images showing red fruit help locate the start of ripening. When a weighed sample is available, the model moves its estimate toward the measured red share. It projects the next 21 days using the room’s warmth rate over the past week. [Ripening model](dwarf-tomato-harvest-forecast/harvest/forecast.py)
+2. **Estimate what each pot can earn.** Pots in the same room ripen at different rates. The model represents that spread with 40 representative pots. A pot qualifies for sale when at least one-third of its fruit weight is red. The trial’s price curve assigns revenue by grams of red fruit, with no additional payment beyond 150 g per pot. [Scoring assumptions](dwarf-tomato-harvest-forecast/config/crop.yaml)
+3. **Compare the return for each candidate day.** For each square metre, the model multiplies expected revenue per pot by plant density, subtracts plant and accumulated growing costs, then divides by days grown. It selects the highest return among dates with at least 95% saleable pots. If no date qualifies, it reports the best return available and leaves the first saleable date unset. For a positive peak, the near-peak window includes adjacent days earning at least 90% of that return. [Profit calculation and date selection](dwarf-tomato-harvest-forecast/harvest/economics.py)
 
-The raw data is not in this repo; the scripts read the time-series zip you download and stream
-only the needed photos straight out of the 31 GB image zip.
-Derived tables are in `out/`. This repo's tables are derived from the dataset above and are shared under the same CC BY 4.0 licence.
+## What changes when there is an order?
 
-## Method
+A buyer can accept pots that ripen during transport. The shipment planner advances ripeness using truck temperature and travel time, then checks fruit weight, saleable share at arrival, display life and the delivery deadline. It returns the earliest harvest satisfying those conditions.
 
-1. **Ripening clock.** % red follows an S-curve in accumulated warmth (degree-days above 10 °C):
-   `pct_red = 100 / (1 + exp(-k (G - G50)))`.
-2. **Photos.** Each noon photo is white-balanced (the purple grow lamps tint it) and the share of strongly
-   saturated red pixels is measured. The first of three days in a row with red fruit visible marks when
-   ripening started in that room. Each room's curve is anchored on that day.
-3. **Honest testing.** Every room is forecast with curves fitted on the other five rooms only.
-4. **Profit.** Uses the challenge's own scoring (Maree et al. 2025, *Sensors* 25:4321): a pot sells only if
-   at least a third of its fruit is red, red fruit above 150 g per pot adds nothing, each plant costs €0.75,
-   each re-spacing €1.50/m², ranked on net profit per m² per day. Costs come from the log. Plants in a room
-   are spread as much as the 5 Nov weighings showed (±12.5 points of red). The price, €2.15 per pot,
-   is backed out from the paper's published profits (implied €1.97–2.31 across rooms).
+In the MuGrow example below, a **350-mile trip at 13 °C** allows a **November 5 harvest and November 7 arrival**. The planner estimates **98% saleable pots on arrival** and **seven days** in best display condition. These are simulated shipment outcomes. The trial measured the greenhouse crop.
 
-## Results
+![MuGrow shipment planner showing the order inputs, recommended harvest and arrival dates, and estimated display life.](docs/images/mugrow-shipment.png)
 
-Forecast error, each room left out of the fit (percentage points of red):
+## How well did it forecast?
 
-| Test | Warmth only | Warmth + photos |
-|---|---|---|
-| % red on measured days (12 points) | 9.6 | 8.7 |
-| % red at harvest, forecast on 5 Nov (6–16 days ahead) | 10.6 | 8.9 |
+The team replayed **November 5, 2024**, the last sample date before any room was harvested. Each room’s shared ripening curve was fitted on the other five rooms using measurements available by that date. The timing test asks when the crop would reach the red share later measured at its actual harvest. That target is known retrospectively.
 
-Most profitable harvest day, as forecast on 6 Nov:
+| Mean absolute error across six rooms | Harvest Window | Warmth alone | Simple baseline |
+| --- | ---: | ---: | ---: |
+| Date the room reached its harvest ripeness | **1.67 days** | 3.00 days | 4.83 days |
+| Red fruit by weight on the actual harvest date | **6.24 percentage points** | 10.11 points | 7.01 points |
 
-| Room | Best day (likely range) | % red then | €/m²/day at best | Actual harvest | €/m²/day at actual | Gain |
-|---|---|---|---|---|---|---|
-| Tomatonuts | 11 Nov (7–14) | 72 | 0.15 | 21 Nov | 0.09 | +59% |
-| Agrifusion | 14 Nov (10–18) | 68 | 0.11 | 20 Nov | 0.085 | +28% |
-| Trigger | 13 Nov (9–18) | 61 | 0.24 | 21 Nov | 0.195 | +25% |
-| MuGrow | 6 Nov | 77 | 0.28 | 11 Nov | 0.235 | +20% |
-| IDEAS | 11 Nov (8–14) | 69 | 0.31 | 12 Nov | 0.31 | +1% |
-| Reference | 15 Nov (12–18) | 63 | 0.10 | 15 Nov | 0.10 | 0% |
+The date baseline uses the other rooms’ average days from planting to harvest. The ripeness baseline uses their average final red share. In a separate comparison, the dashboard’s **economic recommendation averaged 4.17 days earlier** than the growers’ actual picks. The trial records one harvest per room, so profit on alternative dates remains a model estimate. All six rooms came from one site and season. [Backtest implementation](dwarf-tomato-harvest-forecast/harvest/backtest.py) · [Per-room results](dwarf-tomato-harvest-forecast/app/data/backtest.json) · [Evaluation metrics](dwarf-tomato-harvest-forecast/presentation-metrics/metrics.csv)
 
-The best day comes when nearly every pot has passed one-third red, at roughly 60–72% red on average,
-and does not move for prices between €1.75 and €2.50. Profit computed at each room's actual harvest
-ranks the rooms almost as the published results do (rank correlation 0.93).
+## Run the demo
 
-## Limits
+The React app includes the trial forecasts and selected canopy photos. From a clone of this repository, use Node.js and npm (tested with Node 24).
 
-- Six rooms, four hand-measured days each, one autumn at one site: patterns are associations, not proof.
-- The camera sees only the top of the canopy and part of one table; the photo index shows when ripening
-  starts and how fast it moves, not a room's exact % red.
-- Fruit dry matter, which also set the price, is not in the data. Harvest labour is not in the cost model.
-- Fruit weight per plant comes from the latest 6-plant weighing, so the profit forecast starts on 5 Nov.
-- The 10 °C degree-day base and the 70% target are adjustable assumptions.
-
-## Run it
-
-```bash
-pip install -r requirements.txt
-python3 prep.py path/to/autonomous_greenhouse_challenge4_timeseries.zip     # clean tables -> out/
-python3 image_features.py out 12                                             # stream 464 noon photos (~25 min)
-python3 dashboard_data.py path/to/autonomous_greenhouse_challenge4_timeseries.zip   # tables for the dashboard -> out/dash/
-python3 forecast.py 70                                                       # forecasts, validation, profit -> out/forecast/
+```sh
+cd dwarf-tomato-harvest-forecast/web
+npm ci
+npm run dev
 ```
 
-`tomato_images_colab.ipynb` pulls selected photos into Google Colab without downloading the whole image zip.
+Open the local URL printed by Vite. Start in **Harvest** with **MuGrow**, move **Inspect a day** to November 11, then scroll to **Crop evidence** to inspect individual pots. In **Shipment**, keep the example order and select **Calculate harvest date**. **How it works** shows the calculations for that order.
 
-## Files
+To reproduce the timing evaluation, start at the repository root with Python 3.14 and Make available.
 
-| Path | What it is |
-|---|---|
-| `prep.py` | Cleans the harvest sheet and builds daily climate and degree-day tables |
-| `image_features.py` | Streams photos from the remote zip and measures colour and depth features |
-| `dashboard_data.py` | Lamp-corrected red index per room and day; small CSVs for the dashboard |
-| `forecast.py` | Ripening curves, leave-one-room-out validation, harvest windows and profit by harvest day |
-| `tomato_images_colab.ipynb` | Colab notebook for exploring the canopy images |
-| `dashboard/index.html` | Source of the interactive dashboard page (runs inside a Claude dashboard artifact, which supplies `dash` and `d3`) |
-| `out/` | Derived tables: daily climate, ripeness, per-plant harvest, image features, forecasts, profit |
+```sh
+cd dwarf-tomato-harvest-forecast
+make setup
+.venv/bin/python -m harvest.backtest
+make test
+```
 
-## Credits
+## Explore the repository
 
-Dataset: S. C. Maree, P. Zhang, B. M. van Marrewijk, F. de Zwart, M. Bijlaard, S. Hemming.
-4th International Autonomous Greenhouse Challenge, Wageningen University & Research, 4TU.ResearchData,
-doi:10.4121/fa102772-32db-4b30-bace-12f2016722ce, CC BY 4.0.
-Scoring rules and published results: Maree et al. (2025), *Autonomous Greenhouse Cultivation of Dwarf Tomato*,
-Sensors 25(14), 4321, doi:10.3390/s25144321.
+| Location | Contents |
+| --- | --- |
+| [Grower interface](dwarf-tomato-harvest-forecast/web/src/grower) | Harvest outlook, shipment planner and custom-room entry |
+| [Forecast pipeline](dwarf-tomato-harvest-forecast/harvest) | Ripening, economics, uncertainty, shipment scenarios and data publication |
+| [Published demo data](dwarf-tomato-harvest-forecast/app/data) | Room forecasts, evidence photos and backtest records consumed by the app |
+| [HarvestWindow operations prototype](hw-branch/harvestwindow) | Greenhouse operations explorer and order-planning work |
+| [Streamlit analysis](app.py) | Earlier analysis dashboard alongside the root-level feature and audit scripts |
+
+**Data credit.** Stef Maree, Pinglin Zhang, Bart van Marrewijk, Feije de Zwart, Monique Bijlaard and Silke Hemming published the trial data under CC BY 4.0. This repository includes the time series, derived tables and selected canopy photos. The full camera collection is available from the dataset publisher. [4TU.ResearchData dataset](https://doi.org/10.4121/fa102772-32db-4b30-bace-12f2016722ce)

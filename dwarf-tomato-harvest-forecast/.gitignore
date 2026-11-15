@@ -1,0 +1,8 @@
+out/thumbs/
+__pycache__/
+.DS_Store
+*.zip
+.venv/
+.pytest_cache/
+.claude/
+build/
